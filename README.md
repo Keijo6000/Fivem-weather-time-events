@@ -12,7 +12,7 @@
 - Hallintapaneeli komennolla `/maailma`
 
 ## Konfiguraatio
-- Lisää server.cfg 'add_ace group.admin weather.admin allow'
+- Lisää server.cfg `add_ace group.admin weather.admin allow`
 tai oma admin groupin arvo jne
 - Configista yksittäiset käyttäjät, joilla oikeus hallintapaneeliin
 
