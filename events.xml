@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<timecycle_modifier_data version="1.000000">
+    <!-- säkkisumu -->
+    <modifier name="Sumu1" numMods="7" userFlags="0">
+        <light_dir_col_r>1.112 0.866</light_dir_col_r>
+        <light_dir_col_g>0.896 1.338</light_dir_col_g>
+        <light_dir_col_b>0.902 0.295</light_dir_col_b>
+        <light_dir_mult>2.225 -3.925</light_dir_mult>
+        <fog_start>0.000 0.000</fog_start>
+        <fog_density>100.000 100.000</fog_density>
+        <far_clip>700.000 700.000</far_clip>
+    </modifier>
+    
+    <!-- lumimyrsky -->
+    <modifier name="Lumimyrsky1" numMods="11" userFlags="0">
+        <light_dir_col_r>0.400 1.000</light_dir_col_r>
+        <light_dir_col_g>0.450 1.000</light_dir_col_g>
+        <light_dir_col_b>0.500 1.000</light_dir_col_b>
+        <light_dir_mult>0.500 0.400</light_dir_mult>
+        <light_amb_down_wrap>0.800 0.800</light_amb_down_wrap>
+        <postfx_exposure>0.550 0.550</postfx_exposure>
+        <postfx_bright_pass_thresh>0.100 0.100</postfx_bright_pass_thresh>
+        <postfx_intensity_bloom>0.500 0.500</postfx_intensity_bloom>
+        <fog_start>0.000 0.000</fog_start>
+        <fog_density>8.900 10.000</fog_density>
+        <far_clip>-8525.000 1650.000</far_clip>
+    </modifier>
+</timecycle_modifier_data>

@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sään ja Ajan Hallinta</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: transparent; color: #ffffff; overflow: hidden; user-select: none; display: none; width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; }
+        body.visible { display: flex; align-items: center; justify-content: center; }
+
+        .container { width: 1200px; height: 850px; background: linear-gradient(165deg, #1a1a2e 0%, #0f0f1a 50%, #16213e 100%); border-radius: 20px; box-shadow: 0 25px 80px rgba(0, 0, 0, 0.6), 0 0 1px rgba(0, 212, 255, 0.3); display: flex; overflow: hidden; position: relative; border: 1px solid rgba(255, 255, 255, 0.08); }
+        .sidebar { width: 200px; background: linear-gradient(180deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%); padding: 24px 0; display: flex; flex-direction: column; border-right: 1px solid rgba(255, 255, 255, 0.06); }
+        .sidebar-title { padding: 0 18px 24px 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); margin-bottom: 20px; }
+        .sidebar-title h1 { font-size: 16px; font-weight: 700; color: #00d4ff; text-transform: uppercase; letter-spacing: 2px; }
+        .sidebar-title p { font-size: 11px; color: rgba(255, 255, 255, 0.4); margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
+
+        .nav-item { padding: 16px 20px; cursor: pointer; transition: all 0.25s ease; border-left: 3px solid transparent; display: flex; align-items: center; gap: 14px; position: relative; }
+        .nav-item:hover { background: rgba(255, 255, 255, 0.05); }
+        .nav-item.active { background: linear-gradient(90deg, rgba(0, 212, 255, 0.15) 0%, rgba(0, 212, 255, 0.05) 100%); border-left-color: #00d4ff; }
+        .nav-item i { width: 22px; font-size: 18px; color: rgba(255, 255, 255, 0.5); text-align: center; transition: all 0.25s ease; }
+        .nav-item.active i { color: #00d4ff; }
+        .nav-item span { font-size: 14px; font-weight: 500; color: rgba(255, 255, 255, 0.6); transition: all 0.25s ease; }
+        .nav-item.active span { color: #ffffff; }
+
+        .main-content { flex: 1; padding: 35px; overflow-y: auto; position: relative; display: flex; flex-direction: column; }
+        .main-content .page { flex: 1; display: none; flex-direction: column; }
+        .page { display: none; animation: fadeIn 0.3s ease; }
+        .page.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .page-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .page-subtitle { font-size: 14px; color: rgba(255, 255, 255, 0.45); margin-bottom: 28px; display: flex; justify-content: space-between; }
+        .weather-timer { font-size: 13px; color: #00d4ff; font-weight: 600; background: rgba(0, 212, 255, 0.1); padding: 4px 10px; border-radius: 6px; }
+
+        .status-card { background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%); border-radius: 14px; padding: 24px; margin-bottom: 16px; border: 1px solid rgba(255, 255, 255, 0.06); transition: all 0.3s ease; }
+        .status-card h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255, 255, 255, 0.4); margin-bottom: 12px; font-weight: 600; }
+        .status-value { font-size: 32px; font-weight: 700; color: #00d4ff; transition: all 0.3s ease; }
+        .status-row { display: flex; gap: 20px; }
+        .status-col { flex: 1; }
+
+        .mode-indicator { background: linear-gradient(135deg, rgba(0, 212, 255, 0.12) 0%, rgba(0, 212, 255, 0.05) 100%); border: 1px solid rgba(0, 212, 255, 0.25); border-radius: 12px; padding: 18px 22px; margin-bottom: 24px; display: flex; align-items: center; gap: 16px; }
+        .mode-indicator .icon { font-size: 32px; }
+        .mode-indicator .text { flex: 1; }
+        .mode-indicator .text strong { display: block; font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+        .mode-indicator .text span { font-size: 12px; color: rgba(255, 255, 255, 0.5); }
+
+        .btn { background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); border: none; border-radius: 10px; padding: 14px 22px; font-size: 14px; font-weight: 600; color: #ffffff; cursor: pointer; transition: all 0.25s ease; display: inline-flex; align-items: center; justify-content: center; gap: 10px; white-space: nowrap; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0, 212, 255, 0.35); }
+        .btn:active { transform: translateY(0); }
+        .btn-secondary { background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .btn-secondary:hover { background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.12) 100%); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2); }
+        .btn-modes { background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%); }
+        .btn-modes:hover { box-shadow: 0 8px 25px rgba(156, 39, 176, 0.4); }
+        .btn-sync { background: linear-gradient(135deg, #2ed573 0%, #1e9e55 100%); }
+        .btn-sync:hover { box-shadow: 0 8px 25px rgba(46, 213, 115, 0.35); }
+        .btn-row { display: flex; gap: 14px; margin-top: 22px; flex-wrap: nowrap; }
+        .btn-row .btn { flex: 1; padding: 14px 18px; font-size: 13px; }
+
+        .weather-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 22px; }
+        .weather-btn { background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%); border: 2px solid transparent; border-radius: 12px; padding: 20px 14px; cursor: pointer; transition: all 0.25s ease; text-align: center; position: relative; overflow: hidden; }
+        .weather-btn::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, transparent 100%); opacity: 0; transition: opacity 0.25s ease; }
+        .weather-btn:hover { background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.04) 100%); border-color: rgba(255, 255, 255, 0.15); transform: translateY(-2px); }
+        .weather-btn:hover::before { opacity: 1; }
+        .weather-btn.selected { border-color: #00d4ff; background: linear-gradient(135deg, rgba(0, 212, 255, 0.18) 0%, rgba(0, 212, 255, 0.08) 100%); }
+        .weather-btn .icon { font-size: 32px; margin-bottom: 10px; position: relative; z-index: 1; }
+        .weather-btn .name { font-size: 13px; font-weight: 600; margin-bottom: 4px; position: relative; z-index: 1; }
+        .weather-btn .chance { font-size: 10px; color: rgba(255, 255, 255, 0.4); position: relative; z-index: 1; }
+
+        .time-management-row { display: flex; align-items: center; justify-content: center; gap: 18px; margin-bottom: 20px; background: rgba(255, 255, 255, 0.02); padding: 18px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .time-input-group { display: flex; align-items: center; gap: 10px; }
+        .time-input { background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%); border: 2px solid rgba(255, 255, 255, 0.15); border-radius: 10px; padding: 12px; width: 85px; text-align: center; font-size: 26px; font-weight: 700; color: #ffffff; outline: none; transition: all 0.25s ease; }
+        .time-input:focus { border-color: #00d4ff; background: linear-gradient(135deg, rgba(0, 212, 255, 0.12) 0%, rgba(0, 212, 255, 0.05) 100%); box-shadow: 0 0 20px rgba(0, 212, 255, 0.2); }
+        .time-separator { font-size: 30px; font-weight: 700; color: rgba(255, 255, 255, 0.4); }
+
+        .quick-time-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+        .quick-time-btn { background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%); border: 2px solid rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 16px 10px; text-align: center; cursor: pointer; transition: all 0.25s ease; }
+        .quick-time-btn:hover { background: linear-gradient(135deg, rgba(0, 212, 255, 0.2) 0%, rgba(0, 212, 255, 0.08) 100%); border-color: #00d4ff; transform: translateY(-2px); }
+        .quick-time-btn .time { font-size: 20px; font-weight: 700; color: #ffffff; display: block; }
+        .quick-time-btn .label { font-size: 11px; color: rgba(255, 255, 255, 0.5); margin-top: 5px; display: block; }
+
+        .special-option { background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%); border-radius: 12px; padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; transition: all 0.25s ease; border: 1px solid rgba(255, 255, 255, 0.05); margin-bottom: 14px; }
+        .special-option:hover { background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%); border-color: rgba(255, 255, 255, 0.1); }
+        .special-option .info { display: flex; align-items: center; gap: 16px; }
+        .special-option .icon { font-size: 28px; }
+        .special-option .text h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+        .special-option .text p { font-size: 12px; color: rgba(255, 255, 255, 0.4); }
+
+        .toggle-switch { position: relative; width: 54px; height: 30px; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%); transition: 0.3s; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .toggle-slider:before { position: absolute; content: ""; height: 24px; width: 24px; left: 3px; bottom: 2px; background: white; transition: 0.3s; border-radius: 50%; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); }
+        .toggle-switch input:checked + .toggle-slider { background: linear-gradient(135deg, #00d4ff 0%, #0099cc 100%); border-color: transparent; }
+        .toggle-switch input:checked + .toggle-slider:before { transform: translateX(24px); }
+        .toggle-switch input:disabled + .toggle-slider { cursor: not-allowed; opacity: 0.4; }
+
+        .status-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 8px 12px; border-radius: 6px; margin-top: 10px; }
+        .status-badge.on { background: rgba(46, 213, 115, 0.15); color: #2ed573; }
+        .status-badge.off { background: rgba(255, 107, 107, 0.15); color: #ff6b6b; }
+        .status-badge.warning { background: rgba(255, 165, 2, 0.15); color: #ffa502; }
+
+        .close-btn { position: absolute; top: 18px; right: 18px; width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%); border: 1px solid rgba(255, 255, 255, 0.1); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.25s ease; z-index: 100; }
+        .close-btn:hover { background: linear-gradient(135deg, rgba(255, 107, 107, 0.3) 0%, rgba(255, 107, 107, 0.15) 100%); border-color: rgba(255, 107, 107, 0.4); transform: rotate(90deg); }
+        .close-btn i { font-size: 16px; color: rgba(255, 255, 255, 0.7); }
+
+        .page-container { position: relative; flex: 1; display: flex; flex-direction: column; }
+        .control-area { position: relative; padding: 8px; margin: -8px; border-radius: inherit; overflow: hidden; }
+
+        .disabled-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.75); display: flex; align-items: center; justify-content: center; z-index: 50; border-radius: inherit; backdrop-filter: blur(3px); }
+        .disabled-text { background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(20, 20, 30, 0.95) 100%); padding: 20px 36px; border-radius: 12px; font-size: 15px; font-weight: 600; color: #ff6b6b; border: 1px solid rgba(255, 107, 107, 0.4); box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 107, 107, 0.1); text-align: center; max-width: 300px; }
+        .disabled-element { opacity: 0.5; pointer-events: none; filter: grayscale(50%); }
+
+        .cycle-toggle { display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%); border-radius: 10px; padding: 14px 18px; margin-bottom: 12px; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .cycle-toggle h4 { font-size: 14px; font-weight: 600; color: rgba(255, 255, 255, 0.8); }
+
+        .section-title { font-size: 14px; font-weight: 600; color: rgba(255, 255, 255, 0.6); margin-bottom: 14px; margin-top: 24px; text-transform: uppercase; letter-spacing: 1px; }
+        .back-btn-container { margin-top: auto; padding-top: 20px; position: relative; z-index: 60; }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.03); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
+
+        /* accordion */
+        .events-container { display: flex; flex-direction: column; gap: 15px; padding-bottom: 20px; }
+        .event-card { background: linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%); border: 2px solid transparent; border-radius: 16px; transition: all 0.3s ease; overflow: hidden; flex-shrink: 0;}
+        .event-card.active { border-color: #00d4ff; background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(0, 212, 255, 0.02) 100%); }
+        .event-header { display: flex; align-items: center; padding: 20px; cursor: pointer; gap: 20px; transition: background 0.3s; }
+        .event-header:hover { background: rgba(255,255,255,0.03); }
+        .event-header i { font-size: 2.5rem; color: #00d4ff; width: 50px; text-align: center; }
+        .event-header .info { flex: 1; }
+        .event-header .info h3 { margin: 0 0 5px 0; font-size: 1.2rem; color: white; font-weight: 600; }
+        .event-header .info p { margin: 0; font-size: 0.85rem; color: rgba(255,255,255,0.5); }
+        .event-header .status { font-size: 0.85rem; font-weight: bold; color: rgba(255,255,255,0.3); text-transform: uppercase; }
+        .event-header .status.active-text { color: #2ed573; }
+        .event-header .status.warning { color: #ffb84d; }
+
+        .event-body { display: none; padding: 0 20px 20px 20px; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 5px; padding-top: 20px; animation: fadeIn 0.3s ease; }
+
+        :root {
+            --cyan: #21d4fd;
+            --blue: #2f80ed;
+            --green: #24d18b;
+            --amber: #ffb84d;
+            --red: #ff5d73;
+            --violet: #a66cff;
+            --panel: rgba(12, 18, 34, 0.92);
+            --panel-soft: rgba(255, 255, 255, 0.065);
+            --stroke: rgba(255, 255, 255, 0.12);
+        }
+
+        body.visible {
+            background:
+                radial-gradient(circle at 12% 18%, rgba(33, 212, 253, 0.18), transparent 32%),
+                radial-gradient(circle at 86% 16%, rgba(166, 108, 255, 0.14), transparent 30%),
+                radial-gradient(circle at 78% 84%, rgba(36, 209, 139, 0.12), transparent 34%);
+        }
+
+        .container {
+            background:
+                linear-gradient(145deg, rgba(19, 28, 50, 0.98), rgba(8, 12, 24, 0.98) 58%, rgba(16, 26, 43, 0.98)),
+                var(--panel);
+            border: 1px solid var(--stroke);
+            border-radius: 18px;
+            box-shadow: 0 28px 90px rgba(0, 0, 0, 0.68), inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 0 0 1px rgba(33, 212, 253, 0.08);
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, rgba(5, 10, 22, 0.9), rgba(12, 18, 34, 0.72));
+            border-right: 1px solid rgba(33, 212, 253, 0.13);
+        }
+
+        .sidebar-title h1 {
+            color: var(--cyan);
+            text-shadow: 0 0 24px rgba(33, 212, 253, 0.35);
+        }
+
+        .nav-item {
+            margin: 2px 12px;
+            border-radius: 10px;
+            border-left: 0;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, rgba(33, 212, 253, 0.2), rgba(47, 128, 237, 0.12));
+            box-shadow: inset 0 0 0 1px rgba(33, 212, 253, 0.18);
+        }
+
+        .nav-item.active i, .nav-item.active span { color: #ffffff; }
+        .nav-item:hover { background: rgba(255, 255, 255, 0.075); }
+
+        .page-title {
+            background: linear-gradient(135deg, #ffffff, #b9edff 44%, #d8ccff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-card, .mode-indicator, .special-option, .cycle-toggle, .time-management-row, .event-card, .weather-btn, .quick-time-btn {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.028));
+            border: 1px solid rgba(255, 255, 255, 0.105);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055), 0 10px 32px rgba(0, 0, 0, 0.18);
+            border-radius: 10px;
+        }
+
+        .status-value, .weather-timer {
+            color: var(--cyan);
+        }
+
+        .mode-indicator {
+            border-color: rgba(33, 212, 253, 0.25);
+            background: linear-gradient(135deg, rgba(33, 212, 253, 0.16), rgba(47, 128, 237, 0.08));
+        }
+
+        .btn {
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--cyan), var(--blue));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 10px 26px rgba(33, 144, 253, 0.22);
+        }
+
+        .btn[style*="#2ed573"], .btn-sync {
+            background: linear-gradient(135deg, #35e6a5, #149c72) !important;
+            box-shadow: 0 10px 26px rgba(36, 209, 139, 0.22);
+        }
+
+        .btn[style*="#ff4757"] {
+            background: linear-gradient(135deg, var(--red), #c72f58) !important;
+            box-shadow: 0 10px 26px rgba(255, 93, 115, 0.22);
+        }
+
+        .btn[style*="#ffa502"], .btn[style*="#eccc68"] {
+            background: linear-gradient(135deg, var(--amber), #d17a22) !important;
+            box-shadow: 0 10px 26px rgba(255, 184, 77, 0.22);
+        }
+
+        .weather-btn.selected, .event-card.active {
+            border-color: rgba(33, 212, 253, 0.68);
+            box-shadow: 0 0 0 1px rgba(33, 212, 253, 0.18), 0 14px 38px rgba(33, 212, 253, 0.1);
+        }
+
+        .event-header i {
+            color: var(--cyan);
+            text-shadow: 0 0 22px rgba(33, 212, 253, 0.32);
+        }
+
+        .event-card:nth-child(2).active { border-color: rgba(166, 108, 255, 0.62); }
+        .event-card:nth-child(2) .event-header i { color: var(--violet); text-shadow: 0 0 22px rgba(166, 108, 255, 0.28); }
+        .event-card:nth-child(3).active { border-color: rgba(185, 231, 255, 0.68); }
+        .event-card:nth-child(4).active { border-color: rgba(255, 184, 77, 0.62); }
+        .event-card:nth-child(4) .event-header i { color: var(--amber); text-shadow: 0 0 22px rgba(255, 184, 77, 0.28); }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background: linear-gradient(135deg, var(--green), var(--cyan));
+        }
+
+        .time-input {
+            border-radius: 8px;
+            border-color: rgba(33, 212, 253, 0.2);
+        }
+
+        input[type="range"] {
+            accent-color: var(--cyan);
+        }
+
+        .status-badge.on { color: #7dffca; background: rgba(36, 209, 139, 0.14); }
+        .status-badge.warning { color: #ffd38a; background: rgba(255, 184, 77, 0.14); }
+        .status-badge.off { color: #ff9bad; background: rgba(255, 93, 115, 0.14); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="close-btn" onclick="closePanel()" title="Sulje ESC:lla"><i class="fas fa-times"></i></button>
+
+        <div class="sidebar">
+            <div class="sidebar-title">
+                <h1>Maailma</h1>
+                <p>Hallintapaneeli</p>
+            </div>
+            <div class="nav-item active" onclick="switchPage(1)"><i class="fas fa-home"></i><span>Etusivu</span></div>
+            <div class="nav-item" onclick="switchPage(2)"><i class="fas fa-cloud-sun"></i><span>Sää</span></div>
+            <div class="nav-item" onclick="switchPage(3)"><i class="fas fa-clock"></i><span>Aika</span></div>
+            <div class="nav-item" onclick="switchPage(4)"><i class="fas fa-star"></i><span>Tilat & Eventit</span></div>
+        </div>
+
+        <div class="main-content">
+            <div class="page active" id="page1">
+                <div class="page-container">
+                    <h2 class="page-title">Tilanne</h2>
+                    <p class="page-subtitle">Nykyinen sää ja aika palvelimella</p>
+
+                    <div class="status-card" style="background: linear-gradient(135deg, rgba(255, 165, 2, 0.1) 0%, rgba(255, 165, 2, 0.03) 100%); border-color: rgba(255, 165, 2, 0.25); margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span style="font-size: 20px;">⚠️</span>
+                            <span style="font-size: 13px; color: rgba(255, 255, 255, 0.7);">Kaikki tässä paneelissa tehdyt asetusten muokkaukset ovat voimassa vain tämän pelisession ajan. Jos haluaa muokata asetuksia pysyvästi, muokkaa <strong style="color: #ffa502;">config.lua</strong>.</span>
+                        </div>
+                    </div>
+
+                    <div class="status-row">
+                        <div class="status-col">
+                            <div class="status-card">
+                                <h3>Nykyinen Sää</h3>
+                                <div class="status-value" id="homeWeather">Ladataan...</div>
+                                <div class="status-badge off" id="weatherFreezeStatus"><span>Jäädytys:</span> Ei</div>
+                            </div>
+                        </div>
+                        <div class="status-col">
+                            <div class="status-card">
+                                <h3>Nykyinen Aika</h3>
+                                <div class="status-value" id="homeTime">--:--</div>
+                                <div class="status-badge off" id="timeFreezeStatus"><span>Jäädytys:</span> Ei</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mode-indicator" id="currentModeIndicator">
+                        <span class="icon" id="modeIcon">☀️</span>
+                        <div class="text">
+                            <strong id="currentModeName">Normaalitila</strong>
+                            <span id="currentModeDesc">Sää ja aika vaihtuvat automaattisesti</span>
+                        </div>
+                    </div>
+
+                    <div class="special-option" style="margin-top: 10px;">
+                        <div class="info">
+                            <span class="icon" style="color: #00d4ff;">🥶</span>
+                            <div class="text">
+                                <h4>Hypotermia (Selviytyminen)</h4>
+                                <p>Pelaajat kärsivät kylmyydestä, jos he ovat vedessä liian kauan.</p>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="hypothermiaToggle" onchange="toggleHypothermia(this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="btn-row">
+                        <button class="btn" onclick="switchPage(2)"><i class="fas fa-cloud-sun"></i> Hallitse Säätä</button>
+                        <button class="btn btn-secondary" onclick="switchPage(3)"><i class="fas fa-clock"></i> Hallitse Aikaa</button>
+                        <button class="btn btn-modes" onclick="switchPage(4)"><i class="fas fa-star"></i> Tilat</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="page2">
+                <div class="page-container">
+                    <h2 class="page-title">Sään Hallinta</h2>
+
+                    <p class="page-subtitle">
+                        Valitse haluamasi säätila manuaalisesti
+                        <span class="weather-timer" id="weatherTimerDisplay" style="display: none;">Vaihtuu: -- min</span>
+                    </p>
+
+                    <div class="status-card" style="margin-bottom: 24px;">
+                        <h3>Nykyinen Sää</h3>
+                        <div class="status-value" id="weatherPageCurrentWeather">--</div>
+                    </div>
+
+                    <div class="control-area" id="weatherControlsArea">
+                        <div class="special-option" style="margin-bottom: 20px;">
+                            <div class="info"><span class="icon">❄️</span><div class="text"><h4>Jäädytä Sää</h4><p>Lukitsee nykyisen säätilan</p></div></div>
+                            <label class="toggle-switch"><input type="checkbox" id="weatherFreezeToggle" onchange="toggleWeatherFreeze(this.checked)"><span class="toggle-slider"></span></label>
+                        </div>
+
+                        <div class="cycle-toggle">
+                            <h4>Perussäät</h4>
+                            <label class="toggle-switch"><input type="checkbox" id="cycleNormalToggle" onchange="toggleWeatherCycle(this.checked ? 'normal' : 'winter')"><span class="toggle-slider"></span></label>
+                        </div>
+
+                        <div class="weather-grid" id="basicWeatherGrid" style="margin-bottom: 24px;">
+                        </div>
+
+                        <div class="cycle-toggle" style="margin-bottom: 0;">
+                            <h4>Lumisade</h4>
+                            <label class="toggle-switch"><input type="checkbox" id="cycleWinterToggle" onchange="toggleWeatherCycle(this.checked ? 'winter' : 'normal')"><span class="toggle-slider"></span></label>
+                        </div>
+                    </div>
+
+                    <div class="control-area" id="environmentControlsArea" style="margin-top: 18px;">
+                        <div class="section-title" style="margin-top: 0;">Ympäristö</div>
+                        <div class="special-option" style="margin-bottom: 14px;">
+                            <div class="info"><span class="icon">⛄</span><div class="text"><h4>Lumi maahan</h4><p>Pakottaa lumen maastoon</p></div></div>
+                            <label class="toggle-switch"><input type="checkbox" id="snowOnGroundToggle" onchange="toggleSnow(this.checked)"><span class="toggle-slider"></span></label>
+                        </div>
+                        <div class="special-option" id="rainControlContainer" style="margin-bottom: 14px; background: rgba(0,0,0,0.2); padding: 14px 20px; display: block;">
+                            <h3 style="margin-bottom: 10px; font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.5);">Sateen Määrä</h3>
+                            <div class="time-input-group" style="width: 100%;">
+                                <input type="range" style="flex: 1; -webkit-appearance: none; height: 10px; border-radius: 5px; background: rgba(255, 255, 255, 0.15); outline: none; cursor: pointer;" id="rainSlider" min="0" max="100" step="1" value="0" oninput="updateRainLabel('rainValue', this.value)" onchange="setRainLevel(this.value)">
+                                <span class="slider-value" id="rainValue" style="min-width: 50px; text-align: right; color: #00d4ff; font-weight: bold; font-size: 16px;">0%</span>
+                            </div>
+                        </div>
+
+                        <div class="back-btn-container" style="margin-top: auto; margin-bottom: 14px;">
+                            <button class="btn btn-secondary" style="width: 100%; padding: 10px 16px; font-size: 12px;" onclick="switchPage(1)"><i class="fas fa-chevron-left"></i> Takaisin</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="page3">
+                <div class="page-container">
+                    <h2 class="page-title">Ajan Hallinta</h2>
+                    <p class="page-subtitle">Aseta palvelimen kellonaika manuaalisesti</p>
+
+                    <div class="status-card" style="margin-bottom: 24px;">
+                        <h3>Nykyinen Aika</h3>
+                        <div class="status-value" id="timePageCurrentTime">--:--</div>
+                    </div>
+
+                    <div id="allTimeControlsWrapper" style="position: relative; display: flex; flex-direction: column; flex: 1;">
+                        <div class="control-area" id="manualTimeControls" style="display: flex; flex-direction: column; flex: 1;">
+                            <div class="special-option" style="margin-bottom: 20px;">
+                                <div class="info"><span class="icon">❄️</span><div class="text"><h4>Jäädytä Aika</h4><p>Estää ajan kulumisen</p></div></div>
+                                <label class="toggle-switch"><input type="checkbox" id="timeFreezeToggle" onchange="toggleTimeFreeze(this.checked)"><span class="toggle-slider"></span></label>
+                            </div>
+
+                            <div class="section-title" style="margin-top: 0;">Pikavalinnat</div>
+                            <div class="quick-time-grid">
+                                <div class="quick-time-btn" onclick="setTimeQuick(0, 0)"><span class="time">00:00</span><span class="label">Keskiyö</span></div>
+                                <div class="quick-time-btn" onclick="setTimeQuick(6, 0)"><span class="time">06:00</span><span class="label">Aamupäivä</span></div>
+                                <div class="quick-time-btn" onclick="setTimeQuick(12, 0)"><span class="time">12:00</span><span class="label">Keskipäivä</span></div>
+                                <div class="quick-time-btn" onclick="setTimeQuick(18, 0)"><span class="time">18:00</span><span class="label">Iltapäivä</span></div>
+                            </div>
+
+                            <div class="section-title">Manuaalinen Asetus</div>
+                            <div class="time-management-row">
+                                <div class="time-input-group" style="margin-bottom: 0;">
+                                    <input type="number" class="time-input" id="hourInput" min="0" max="23" placeholder="00">
+                                    <span class="time-separator">:</span>
+                                    <input type="number" class="time-input" id="minuteInput" min="0" max="59" placeholder="00">
+                                </div>
+                                <button class="btn btn-sync" onclick="setTime()" style="padding: 0 20px; height: 60px; font-size: 15px;"><i class="fas fa-check"></i> Aseta</button>
+                            </div>
+                        </div>
+
+                        <div class="special-option" id="syncOptionContainer" style="margin-top: 14px; margin-bottom: 0;">
+                            <div class="info"><span class="icon">🔄</span><div class="text"><h4>Synkronoi Suomen Aikaan</h4><p>Seuraa oikeaa kelloa automaattisesti</p></div></div>
+                            <label class="toggle-switch"><input type="checkbox" id="syncRealTimeToggle" onchange="toggleSyncWithRealTime(this.checked)"><span class="toggle-slider"></span></label>
+                        </div>
+
+                        <div class="back-btn-container" style="margin-top: 14px;">
+                            <button class="btn btn-secondary" style="width: 100%; padding: 10px 16px; font-size: 12px;" onclick="switchPage(1)"><i class="fas fa-chevron-left"></i> Takaisin</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page" id="page4">
+                <div class="page-container">
+                    <h2 class="page-title">Tilat & Eventit</h2>
+                    <p class="page-subtitle">Valitse ja käynnistä erikoistapahtumia palvelimelle</p>
+
+                    <div class="events-container" style="flex: 1; overflow-y: auto; padding-right: 10px;">
+
+                        <div class="event-card" id="card-flood">
+                            <div class="event-header" onclick="toggleAccordion('flood')">
+                                <i class="fas fa-water"></i>
+                                <div class="info">
+                                    <h3>Vedenpaisumus</h3>
+                                    <p>Kaupunki peittyy veteen, hallitse tulvaa.</p>
+                                </div>
+                                <div class="status" id="status-flood">Ei aktiivinen</div>
+                            </div>
+                            <div class="event-body" id="body-flood">
+                                <div class="status-row" id="floodTimerRow" style="display: none; margin-bottom: 15px;">
+                                    <div style="flex: 1; background: rgba(255,165,2,0.2); padding: 12px; border-radius: 8px; text-align: center; border: 1px solid rgba(255,165,2,0.5);">
+                                        <div style="font-size: 11px; color: rgba(255,255,255,0.7); text-transform: uppercase;">Tulva alkaa:</div>
+                                        <div id="floodTimerText" style="font-size: 20px; font-weight: 700; color: #ffa502;">15 MIN</div>
+                                    </div>
+                                </div>
+
+                                <div class="special-option" style="margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 20px; display: flex; align-items: flex-start; justify-content: space-between;" id="opt-floodH">
+                                    <div style="display: flex; flex-direction: column; align-items: stretch; flex: 1; gap: 10px;">
+                                        <h3 style="margin-bottom: 0; font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.5);">Tavoitekorkeus (M)</h3>
+                                        <div class="time-input-group" style="width: 100%; margin-bottom: 0;">
+                                            <input type="range" id="floodHeightSlider" min="1" max="100" step="1" value="25" style="flex: 1; -webkit-appearance: none; height: 10px; border-radius: 5px; background: rgba(255, 255, 255, 0.15); outline: none; cursor: pointer;" oninput="updateFloodHeight(this.value)">
+                                            <span class="slider-value" id="floodHeightValue" style="min-width: 70px; text-align: right; color: #00d4ff; font-weight: bold; font-size: 16px;">25 m</span>
+                                        </div>
+                                        <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; text-align: center; line-height: 1.4;">10m = Pieni<br>25m = Sopiva<br>>50m = Täystuho</div>
+                                        <h3 style="margin-bottom: 0; font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.5);">Nousuaika (s/m)</h3>
+                                        <div class="time-input-group" style="width: 100%; margin-bottom: 0;">
+                                            <input type="range" id="floodRateSlider" min="0.1" max="20" step="0.1" value="5" style="flex: 1; -webkit-appearance: none; height: 10px; border-radius: 5px; background: rgba(255, 255, 255, 0.15); outline: none; cursor: pointer;" oninput="updateFloodRate(this.value)" onchange="commitFloodRate(this.value)">
+                                            <span class="slider-value" id="floodRateValue" style="min-width: 80px; text-align: right; color: #00d4ff; font-weight: bold; font-size: 16px;">5.0 s/m</span>
+                                        </div>
+                                        <div style="font-size: 11px; color: rgba(255,255,255,0.4); text-align: center; line-height: 1.4;">1s/m = Hyökyaalto<br>5s/m = Nopea nousu<br>20s/m = Hidas tulviminen</div>
+                                    </div>
+                                </div>
+
+                                <div class="special-option" style="margin-bottom: 15px;" id="opt-floodW">
+                                    <div class="info">
+                                        <span class="icon">📢</span>
+                                        <div class="text">
+                                            <h4>Vaaratiedote</h4>
+                                            <p>Lähettää varoituksen pelaajille.</p>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="floodWarningToggle" onchange="toggleFloodOption('warning', this.checked)" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="special-option" style="margin-bottom: 15px;" id="opt-floodS">
+                                    <div class="info">
+                                        <span class="icon">⛈️</span>
+                                        <div class="text">
+                                            <h4>Myrsky</h4>
+                                            <p>Aseta myrskysää tulvan ajaksi.</p>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="floodStormToggle" onchange="toggleFloodOption('storm', this.checked)" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="special-option" style="margin-bottom: 15px;" id="opt-floodA">
+                                    <div class="info">
+                                        <span class="icon">🚨</span>
+                                        <div class="text">
+                                            <h4>Väestönsuojasireenit</h4>
+                                            <p>Toistaa hätäsireenin automaattisesti kun tulva alkaa.</p>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="floodSirensToggle" onchange="toggleFloodOption('sirens', this.checked)" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+
+                                <div class="btn-row" style="margin-top: 0; margin-bottom: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                                    <button class="btn" id="floodStartNowBtn" onclick="setFloodAction('start_now')" style="background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%); font-size: 12px;"><i class="fas fa-play"></i> Pakota tulva heti</button>
+                                    <button class="btn" id="floodStartTimerBtn" onclick="setFloodAction('start_15min')" style="background: linear-gradient(135deg, #ffa502 0%, #eccc68 100%); font-size: 12px;"><i class="fas fa-clock"></i> 15min varoitusaika</button>
+
+                                    <div id="floodDroppingText" style="display: none; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 14px; text-align: center; font-size: 13px; font-weight: 600; color: #70a1ff;"><i class="fas fa-hourglass-half"></i> Odota</div>
+                                    <button class="btn" id="floodStopBtn" onclick="setFloodAction('stop')" style="background: linear-gradient(135deg, #3742fa 0%, #70a1ff 100%); display: none;"><i class="fas fa-arrow-down"></i> Laske Vesi</button>
+                                    <button class="btn" id="floodResetBtn" onclick="setFloodAction('reset')" style="background: linear-gradient(135deg, #2ed573 0%, #1e9e55 100%); display: none;"><i class="fas fa-check"></i> Nollaa ja Lopeta</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="event-card" id="card-earthquake">
+                            <div class="event-header" onclick="toggleAccordion('earthquake')">
+                                <i class="fas fa-house-damage"></i>
+                                <div class="info">
+                                    <h3>Maanjäristys</h3>
+                                    <p>Koko kaupunki tärisee ja varashälyttimet soivat.</p>
+                                </div>
+                                <div class="status" id="status-earthquake">Ei aktiivinen</div>
+                            </div>
+                            <div class="event-body" id="body-earthquake">
+                                <div class="special-option" style="margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 14px 20px; display: block;" id="opt-eqIntensity">
+                                    <h3 style="margin-bottom: 10px; font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.5);">Järistyksen Voimakkuus</h3>
+                                    <div class="time-input-group" style="width: 100%;">
+                                        <input type="range" style="flex: 1; -webkit-appearance: none; height: 10px; border-radius: 5px; background: rgba(255, 255, 255, 0.15); outline: none; cursor: pointer;" id="eqIntensitySlider" min="10" max="100" step="10" value="50" oninput="document.getElementById('eqIntensityValue').textContent = this.value + '%'" onchange="updateSliderOption('earthquake', 'intensity', this.value)">
+                                        <span class="slider-value" id="eqIntensityValue" style="min-width: 50px; text-align: right; color: #00d4ff; font-weight: bold; font-size: 16px;">50%</span>
+                                    </div>
+                                </div>
+
+                                <div class="special-option" style="margin-bottom: 15px;" id="opt-eqW">
+                                    <div class="info">
+                                        <span class="icon">📢</span>
+                                        <div class="text">
+                                            <h4>Vaaratiedote</h4>
+                                            <p>Lähettää hätäilmoituksen pelaajille ruudulle.</p>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="eqWarningToggle" onchange="toggleSpecificOption('earthquake', 'warning', this.checked)" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="special-option" style="margin-bottom: 15px;" id="opt-eqS">
+                                    <div class="info">
+                                        <span class="icon">🚨</span>
+                                        <div class="text">
+                                            <h4>Väestönsuojasireenit</h4>
+                                            <p>Toistaa hätäsireenit kaupungissa.</p>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="eqSirensToggle" onchange="toggleSpecificOption('earthquake', 'sirens', this.checked)" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="btn-row" style="margin-top: 0; margin-bottom: 0;">
+                                    <button class="btn" id="startEarthquakeBtn" onclick="startSpecialEvent('earthquake')" style="background: linear-gradient(135deg, #2ed573 0%, #1e9e55 100%);"><i class="fas fa-play"></i> Aloita Event</button>
+                                    <button class="btn" id="stopEarthquakeBtn" onclick="stopSpecialEvent()" style="background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%); display: none;"><i class="fas fa-stop"></i> Lopeta Event</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="event-card" id="card-heavyfog">
+                            <div class="event-header" onclick="toggleAccordion('heavyfog')">
+                                <i class="fas fa-smog"></i>
+                                <div class="info">
+                                    <h3>Säkkisumu</h3>
+                                    <p>Paksu modi-sumu peittää näkyvyyden kokonaan.</p>
+                                </div>
+                                <div class="status" id="status-heavyfog">Ei aktiivinen</div>
+                            </div>
+                            <div class="event-body" id="body-heavyfog">
+                                <div class="special-option" style="margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 14px 20px; display: block;" id="opt-fogDensity">
+                                    <h3 style="margin-bottom: 10px; font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.5);">Sumun Tiheys</h3>
+                                    <div class="time-input-group" style="width: 100%;">
+                                        <input type="range" style="flex: 1; -webkit-appearance: none; height: 10px; border-radius: 5px; background: rgba(255, 255, 255, 0.15); outline: none; cursor: pointer;" id="fogDensitySlider" min="10" max="100" step="10" value="100" oninput="updateFogDensityInput(this.value)" onchange="updateFogDensity(this.value)">
+                                        <span class="slider-value" id="fogDensityValue" style="min-width: 50px; text-align: right; color: #00d4ff; font-weight: bold; font-size: 16px;">100%</span>
+                                    </div>
+                                </div>
+                                <div class="btn-row" style="margin-top: 0; margin-bottom: 0;">
+                                    <button class="btn" id="startHeavyfogBtn" onclick="startSpecialEvent('heavyfog')" style="background: linear-gradient(135deg, #2ed573 0%, #1e9e55 100%);"><i class="fas fa-play"></i> Aloita Event</button>
+                                    <button class="btn" id="stopHeavyfogBtn" onclick="stopSpecialEvent()" style="background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%); display: none;"><i class="fas fa-stop"></i> Lopeta Event</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="event-card" id="card-blizzard">
+                            <div class="event-header" onclick="toggleAccordion('blizzard')">
+                                <i class="fas fa-snowflake"></i>
+                                <div class="info">
+                                    <h3>Lumimyrsky</h3>
+                                    <p>Erittäin voimakas lumimyrsky peittää näkyvyyden.</p>
+                                </div>
+                                <div class="status" id="status-blizzard">Ei aktiivinen</div>
+                            </div>
+                            <div class="event-body" id="body-blizzard">
+                                <div class="special-option" style="margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 14px 20px; display: block;" id="opt-blizzardIntensity">
+                                    <h3 style="margin-bottom: 10px; font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.5);">Myrskyn Voimakkuus</h3>
+                                    <div class="time-input-group" style="width: 100%;">
+                                        <input type="range" style="flex: 1; -webkit-appearance: none; height: 10px; border-radius: 5px; background: rgba(255, 255, 255, 0.15); outline: none; cursor: pointer;" id="blizzardIntensitySlider" min="10" max="100" step="10" value="50" oninput="document.getElementById('blizzardIntensityValue').textContent = this.value + '%'" onchange="updateSliderOption('blizzard', 'intensity', this.value)">
+                                        <span class="slider-value" id="blizzardIntensityValue" style="min-width: 50px; text-align: right; color: #00d4ff; font-weight: bold; font-size: 16px;">50%</span>
+                                    </div>
+                                </div>
+                                <div class="special-option" style="margin-bottom: 15px;" id="opt-blizzardSnow">
+                                    <div class="info">
+                                        <span class="icon">⛄</span>
+                                        <div class="text">
+                                            <h4>Lisää lunta maahan</h4>
+                                            <p>Pakottaa lumen maastoon myrskyn ajaksi.</p>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="blizzardSnowToggle" onchange="toggleSpecificOption('blizzard', 'addSnow', this.checked)" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="special-option" style="margin-bottom: 15px; display: none;" id="opt-blizzardKeepSnow">
+                                    <div class="info">
+                                        <span class="icon">*</span>
+                                        <div class="text">
+                                            <h4>J&auml;t&auml; lumi maahan</h4>
+                                            <p>Lumi j&auml;&auml; maahan myrskyn j&auml;lkeen.</p>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="blizzardKeepSnowToggle" onchange="toggleSpecificOption('blizzard', 'keepSnow', this.checked)" checked>
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="btn-row" style="margin-top: 0; margin-bottom: 0;">
+                                    <button class="btn" id="startBlizzardBtn" onclick="startSpecialEvent('blizzard')" style="background: linear-gradient(135deg, #2ed573 0%, #1e9e55 100%);"><i class="fas fa-play"></i> Aloita Event</button>
+                                    <button class="btn" id="stopBlizzardBtn" onclick="stopSpecialEvent()" style="background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%); display: none;"><i class="fas fa-stop"></i> Lopeta Event</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="event-card" id="card-halloween">
+                            <div class="event-header" onclick="toggleAccordion('halloween')">
+                                <i class="fas fa-ghost"></i>
+                                <div class="info">
+                                    <h3>Halloween</h3>
+                                    <p>Halloween-sade, keskiyö lukittu.</p>
+                                </div>
+                                <div class="status" id="status-halloween">Ei aktiivinen</div>
+                            </div>
+                            <div class="event-body" id="body-halloween">
+                                <div class="special-option" style="margin-bottom: 15px;" id="opt-hw">
+                                    <div class="info">
+                                        <span class="icon">⛈️</span>
+                                        <div class="text">
+                                            <h4>Myrsky + Halloween</h4>
+                                            <p>Aseta myrsky normaalin halloween-sateen sijaan.</p>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="halloweenStormToggle" onchange="toggleHalloweenStorm(this.checked)">
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </div>
+                                <div class="btn-row" style="margin-top: 0; margin-bottom: 0;">
+                                    <button class="btn" id="startHalloweenBtn" onclick="startSpecialEvent('halloween')" style="background: linear-gradient(135deg, #2ed573 0%, #1e9e55 100%);"><i class="fas fa-play"></i> Aloita Event</button>
+                                    <button class="btn" id="stopHalloweenBtn" onclick="stopSpecialEvent()" style="background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%); display: none;"><i class="fas fa-stop"></i> Lopeta Event</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-title">Ympäristöasetukset</div>
+                        <div class="special-options">
+                            <div class="special-option">
+                                <div class="info">
+                                    <span class="icon">🌑</span>
+                                    <div class="text">
+                                        <h4>Blackout-tila</h4>
+                                        <p>Poistaa kaikki tekovalonlähteet.</p>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="blackoutToggle" onchange="toggleBlackout(this.checked)">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="special-option" id="vehicleLightsOptionContainer">
+                                <div class="info">
+                                    <span class="icon">🚗</span>
+                                    <div class="text">
+                                        <h4>Ajoneuvojen valot pois</h4>
+                                        <p>Sammuttaa ajoneuvojen valot (Vain jos Blackout päällä)</p>
+                                    </div>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="vehicleLightsToggle" onchange="toggleVehicleLights(this.checked)">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="back-btn-container">
+                            <button class="btn btn-secondary" style="width: 100%; padding: 10px 16px; font-size: 12px;" onclick="switchPage(1)"><i class="fas fa-chevron-left"></i> Takaisin</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentState = {
+            currentWeather: 'CLEAR', //sää
+            currentHour: 12, //tunti
+            currentMinute: 0, //minuutti
+            weatherFrozen: false, //sää lukossa
+            timeFrozen: false, //aika lukossa
+            weatherCycle: 'normal', //sääsykli
+            snowOnGround: false, //lumi maassa
+            rainLevel: 0.0, //sade
+            blackout: false, //sähköt
+            vehicleLightsDisabled: false, //autovalot
+            syncWithRealTime: false, //realiaika
+            isTransitioning: false, //siirtymä
+            weatherChangeTimer: 0, //sääajastin
+
+            hypothermiaEnabled: false, //hypotermia
+
+            activeEvent: 'none', //eventti
+            eventLocked: false, //eventtilukko
+            eventLockReason: null, //syy ui
+            eventStartedAt: 0, //aloitusaika
+            eventElapsedMs: 0, //synkronointi
+            eventOptions: {
+                fogDensity: 0.5, //sumu
+                halloween: { storm: true }, //halloween
+                heavyfog: { canStop: false }, //sumun stop
+                earthquakePhase: 'none', //järistysvaihe
+                earthquake: { sirens: true, warning: true, intensity: 0.5 }, //järistys
+                blizzard: { intensity: 0.5, addSnow: true, keepSnow: true, canStop: false } //lumimyrsky
+            },
+
+            floodActive: false, //tulva päällä
+            targetFloodLevel: 0.0, //tulvan target
+            currentFloodLevel: 0.0, //tulvan taso
+            floodStorm: true, //tulvamyrsky
+            floodTimerActive: false, //15min timer
+            floodTimerMinutes: 0, //timer min
+            sirensActive: false, //sireenit
+            sirensWillActivate: true, //sireenit alussa
+            floodWarningEnabled: true, //tiedote
+            floodRiseRate: 5.0, //nousunopeus
+            isWaterDropping: false, //vesi laskee
+            currentActualFloodLevel: 0.0 //ui taso
+        };
+        let pendingFloodAction = null; //pending
+        let pendingFloodActionAt = 0; //pending aika
+        let localFloodRiseRate = null; //slider nopeus
+
+        const weatherNames = {
+            'EXTRASUNNY': '☀️ Erittäin Aurinkoinen', 'CLEAR': '🌞 Selkeä', 'CLOUDS': '☁️ Pilvinen',
+            'SMOG': '🌫️ Smog', 'FOGGY': '🌁 Sumuinen', 'OVERCAST': '🌥️ Pilvipeitto',
+            'RAIN': '🌧️ Sade', 'THUNDER': '⛈️ Ukkomyrsky', 'CLEARING': '⛅ Selkenevä',
+            'HALLOWEEN': '🎃 Myrsky-Halloween', 'RAIN_HALLOWEEN': '🌧️ Sateinen Halloween',
+            'NEUTRAL': '🌫️ Säkkisumu', 'SNOWLIGHT': '❄️ Kevyt Lumi', 'SNOW': '❄️ Lumi', 'BLIZZARD': '❄️❄️ Lumimyrsky',
+        };
+
+        const NormalWeatherTypes = [
+            { id: 'EXTRASUNNY', name: 'Erittäin Aurinkoinen',   emoji: '☀️', chance: 15 },
+            { id: 'CLEAR',      name: 'Selkeä',                emoji: '🌞', chance: 20 },
+            { id: 'CLOUDS',     name: 'Pilvinen',              emoji: '☁️', chance: 15 },
+            { id: 'SMOG',       name: 'Smog',                  emoji: '🌫️', chance: 5  },
+            { id: 'FOGGY',      name: 'Sumuinen',              emoji: '🌁', chance: 5  },
+            { id: 'OVERCAST',   name: 'Pilvipeitto',           emoji: '🌥️', chance: 10 },
+            { id: 'RAIN',       name: 'Sade',                  emoji: '🌧️', chance: 10 },
+            { id: 'THUNDER',    name: 'Ukkosmyrsky',           emoji: '⛈️', chance: 5  },
+            { id: 'CLEARING',   name: 'Selkenevä',             emoji: '⛅', chance: 15 }
+        ];
+
+        function generateWeatherButtons() {
+            const grid = document.getElementById('basicWeatherGrid'); //säägrid
+            if (!grid) return; //ei gridiä
+
+            grid.innerHTML = ''; //tyhjäksi
+
+            // sääpainikkeet
+            const weatherTypes = currentState.normalWeatherTypes || NormalWeatherTypes;
+
+            weatherTypes.forEach(weather => {
+                const weatherId = weather.type || weather.id; //id
+                const fullName = weatherNames[weatherId] || weatherId; //nimi
+                const parts = fullName.split(' '); //osat
+                const emoji = parts[0] || '❓'; //emoji
+                const name = parts.slice(1).join(' ') || weatherId; //teksti
+
+                const btn = document.createElement('div'); //painike
+                btn.className = 'weather-btn'; //luokka
+                btn.setAttribute('data-weather-id', weatherId); //id data
+                btn.onclick = function() { setWeather(weatherId); }; //sää klik
+
+                const icon = document.createElement('div'); //ikoni
+                icon.className = 'icon'; //luokka
+                icon.textContent = emoji; //emoji
+
+                const nameEl = document.createElement('div'); //nimi
+                nameEl.className = 'name'; //luokka
+                nameEl.textContent = name; //teksti
+
+                const chance = document.createElement('div'); //todennäköisyys
+                chance.className = 'chance'; //luokka
+                chance.textContent = (weather.chance || weather.percentage || 0) + '% todennäköisyys'; //painotus
+
+                btn.appendChild(icon); //ikoni sisään
+                btn.appendChild(nameEl); //nimi sisään
+                btn.appendChild(chance); //painotus sisään
+                grid.appendChild(btn); //gridiin
+            });
+        }
+
+        function updateWeatherTimerUI() {
+            const timerDisplay = document.getElementById('weatherTimerDisplay'); //sääajastin
+            if (currentState.weatherFrozen || isWeatherFullyLocked() || currentState.weatherCycle === 'winter') {
+                timerDisplay.style.display = 'none'; //piiloon
+            } else {
+                timerDisplay.style.display = 'inline-block'; //näkyviin
+                let m = Math.ceil(currentState.weatherChangeTimer / 60); //minuutit
+                if (m < 0) m = 0; //ei miinusta
+                timerDisplay.textContent = `Vaihtuu: ${m} min`; //teksti
+            }
+        }
+
+        function isSpecialModeTimeLocked() { return ['halloween'].includes(currentState.activeEvent); } //aika lukossa
+        function isWeatherFullyLocked() { return ['halloween', 'blizzard', 'heavyfog'].includes(currentState.activeEvent); } //sää lukossa
+
+        function getFloodUiState() {
+            if (pendingFloodAction === 'start_now') {
+                return { timer: false, active: true, dropping: false, resetting: false, timerMinutes: 0, pending: true }; //heti tulva
+            }
+
+            if (pendingFloodAction === 'start_15min') {
+                return { timer: true, active: false, dropping: false, resetting: false, timerMinutes: 15, pending: true }; //timer heti
+            }
+
+            if (pendingFloodAction === 'stop') {
+                return { timer: false, active: false, dropping: true, resetting: false, timerMinutes: 0, pending: true }; //lasku heti
+            }
+
+            if (pendingFloodAction === 'reset') {
+                return { timer: false, active: false, dropping: false, resetting: true, timerMinutes: 0, pending: true }; //reset heti
+            }
+
+            return {
+                timer: currentState.floodTimerActive, //timer
+                active: currentState.floodActive, //tulva
+                dropping: currentState.isWaterDropping, //lasku
+                resetting: false, //ei reset statea
+                timerMinutes: currentState.floodTimerMinutes || 0, //minuutit
+                pending: false //ei pending
+            };
+        }
+
+        function isPendingFloodActionResolved() {
+            if (!pendingFloodAction) return true; //ei pending
+
+            if (pendingFloodAction === 'start_now') {
+                return currentState.activeEvent === 'flood' && currentState.floodActive && !currentState.floodTimerActive && !currentState.isWaterDropping; //vahvistettu
+            }
+
+            if (pendingFloodAction === 'start_15min') {
+                return currentState.activeEvent === 'flood' && currentState.floodTimerActive; //timer vahvistettu
+            }
+
+            if (pendingFloodAction === 'stop') {
+                return currentState.isWaterDropping; //lasku vahvistettu
+            }
+
+            if (pendingFloodAction === 'reset') {
+                return currentState.activeEvent === 'none' && !currentState.floodTimerActive && !currentState.floodActive && !currentState.isWaterDropping; //reset vahvistettu
+            }
+
+            return true; //tuntematon pois
+        }
+
+        function syncPendingFloodAction() {
+            if (!pendingFloodAction) return; //ei pending
+
+            const pendingAge = Date.now() - pendingFloodActionAt; //ikä
+            if (isPendingFloodActionResolved() || pendingAge > 4000) {
+                pendingFloodAction = null; //pending pois
+                pendingFloodActionAt = 0; //aika nollaan
+            }
+        }
+
+        function updateFogDensityInput(percentValue) {
+            // slider live
+            const value = Math.max(10, Math.min(100, parseInt(percentValue, 10) || 50));
+            document.getElementById('fogDensityValue').textContent = value + '%';
+        }
+
+        function updateFogDensity(percentValue) {
+            // tiheys servulle
+            const value = Math.max(10, Math.min(100, parseInt(percentValue, 10) || 50));
+            document.getElementById('fogDensityValue').textContent = value + '%';
+            if (!currentState.eventOptions) currentState.eventOptions = {};
+            currentState.eventOptions.fogDensity = value / 100.0;
+            fetchPost('updateEventOption', { eventName: 'heavyfog', option: 'density', value: currentState.eventOptions.fogDensity });
+        }
+
+        function updateFloodHeight(value) {
+            const meters = Math.max(1, Math.min(100, parseInt(value, 10) || 25)); //korkeus
+            document.getElementById('floodHeightValue').textContent = meters + ' m'; //teksti
+        }
+
+        function updateFloodRate(value) {
+            const seconds = Math.max(0.1, Math.min(20, parseFloat(value) || 5.0)); //nopeus
+            document.getElementById('floodRateValue').textContent = seconds.toFixed(1) + ' s/m'; //teksti
+            currentState.floodRiseRate = seconds; //local state
+            localFloodRiseRate = seconds; //slider arvo
+        }
+
+        function isFloodAtTargetHeight() {
+            return currentState.activeEvent === 'flood'
+                && currentState.floodActive
+                && !currentState.floodTimerActive
+                && !currentState.isWaterDropping
+                && Math.abs((currentState.currentActualFloodLevel || 0) - (currentState.targetFloodLevel || 0)) <= 0.05;
+        }
+
+        function commitFloodRate(value) {
+            const seconds = Math.max(0.1, Math.min(20, parseFloat(value) || 5.0));
+            currentState.floodRiseRate = seconds;
+            localFloodRiseRate = seconds;
+            if (isFloodAtTargetHeight()) {
+                fetchPost('updateEventOption', { eventName: 'flood', option: 'riseRate', value: seconds });
+            }
+        }
+
+        function clearLocalFloodRateIfIdle() {
+            const floodRateSlider = document.getElementById('floodRateSlider');
+            if (!floodRateSlider || document.activeElement !== floodRateSlider) {
+                localFloodRiseRate = null;
+            }
+        }
+
+        function toggleAccordion(eventName) {
+            const body = document.getElementById('body-' + eventName);
+            const card = document.getElementById('card-' + eventName);
+
+            if (body.style.display === 'block') {
+                body.style.display = 'none';
+                if(currentState.activeEvent !== eventName) card.classList.remove('active');
+            } else {
+                document.querySelectorAll('.event-body').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.event-card').forEach(el => {
+                    const id = el.id.split('-')[1];
+                    if (id !== currentState.activeEvent) el.classList.remove('active');
+                });
+
+                body.style.display = 'block';
+                card.classList.add('active');
+            }
+            updateEventButtons();
+        }
+
+        function toggleFloodOption(option, state) {
+            const rateSlider = document.getElementById('floodRateSlider');
+            const riseRate = rateSlider ? Math.max(0.1, Math.min(20, parseFloat(rateSlider.value) || 5.0)) : currentState.floodRiseRate;
+            currentState.floodRiseRate = riseRate;
+            localFloodRiseRate = riseRate;
+            fetchPost('toggleFloodOption', { option: option, state: state, riseRate: riseRate });
+        }
+
+        function toggleSpecificOption(eventName, optionName, state) {
+            if (!currentState.eventOptions) currentState.eventOptions = {};
+            if (!currentState.eventOptions[eventName]) currentState.eventOptions[eventName] = {};
+            currentState.eventOptions[eventName][optionName] = state;
+            if (eventName === 'blizzard' && optionName === 'addSnow') updateBlizzardKeepSnowVisibility();
+            fetchPost('updateEventOption', { eventName: eventName, option: optionName, value: state });
+        }
+
+        function updateBlizzardKeepSnowVisibility() {
+            const keepSnowOption = document.getElementById('opt-blizzardKeepSnow');
+            const keepSnowToggle = document.getElementById('blizzardKeepSnowToggle');
+            const addSnowToggle = document.getElementById('blizzardSnowToggle');
+            const addSnow = addSnowToggle ? addSnowToggle.checked : !!(currentState.eventOptions && currentState.eventOptions.blizzard && currentState.eventOptions.blizzard.addSnow);
+            if (!keepSnowOption) return;
+
+            keepSnowOption.style.display = addSnow ? 'flex' : 'none';
+            if (keepSnowToggle && addSnow && currentState.eventOptions && currentState.eventOptions.blizzard && currentState.eventOptions.blizzard.keepSnow === undefined) {
+                keepSnowToggle.checked = true;
+            }
+        }
+
+        function updateSliderOption(eventName, optionName, value) {
+            let floatVal = parseInt(value) / 100.0;
+            if (!currentState.eventOptions) currentState.eventOptions = {};
+            if (!currentState.eventOptions[eventName]) currentState.eventOptions[eventName] = {};
+            currentState.eventOptions[eventName][optionName] = floatVal;
+            fetchPost('updateEventOption', { eventName: eventName, option: optionName, value: floatVal });
+        }
+
+        function updateEventButtons() {
+            // halloween
+            const btnStartHW = document.getElementById('startHalloweenBtn');
+            const btnStopHW = document.getElementById('stopHalloweenBtn');
+            const statusHW = document.getElementById('status-halloween');
+            const optHw = document.getElementById('opt-hw');
+
+            if (currentState.activeEvent === 'halloween') {
+                btnStartHW.style.display = 'none'; btnStopHW.style.display = 'block';
+                statusHW.textContent = 'Aktiivinen'; statusHW.className = 'status active-text';
+            } else {
+                btnStartHW.style.display = 'block'; btnStopHW.style.display = 'none';
+                const blockStartHalloween = currentState.activeEvent !== 'none' || currentState.eventLocked;
+                btnStartHW.style.opacity = blockStartHalloween ? '0.5' : '1';
+                btnStartHW.style.pointerEvents = blockStartHalloween ? 'none' : 'auto';
+                btnStartHW.innerHTML = '<i class="fas fa-play"></i> Aloita Event';
+                statusHW.textContent = 'Ei aktiivinen'; statusHW.className = 'status';
+                optHw.classList.remove('disabled-element');
+            }
+
+            // lumimyrsky
+            const btnStartBliz = document.getElementById('startBlizzardBtn');
+            const btnStopBliz = document.getElementById('stopBlizzardBtn');
+            const statusBliz = document.getElementById('status-blizzard');
+            const optBlizInt = document.getElementById('opt-blizzardIntensity');
+            const optBlizSnow = document.getElementById('opt-blizzardSnow');
+            const optBlizKeepSnow = document.getElementById('opt-blizzardKeepSnow');
+            const blizKeepSnowToggle = document.getElementById('blizzardKeepSnowToggle');
+
+            if (currentState.activeEvent === 'blizzard') {
+                const canStopBlizzard = !!(currentState.eventOptions && currentState.eventOptions.blizzard && currentState.eventOptions.blizzard.canStop);
+                btnStartBliz.style.display = 'none'; btnStopBliz.style.display = 'block';
+                btnStopBliz.disabled = !canStopBlizzard;
+                btnStopBliz.style.pointerEvents = canStopBlizzard ? 'auto' : 'none';
+                btnStopBliz.style.opacity = canStopBlizzard ? '1' : '0.75';
+                btnStopBliz.innerHTML = '<i class="fas fa-stop"></i> Lopeta Event';
+                statusBliz.textContent = canStopBlizzard ? 'Aktiivinen' : 'Odota';
+                statusBliz.className = canStopBlizzard ? 'status active-text' : 'status warning';
+                document.getElementById('blizzardSnowToggle').disabled = true;
+                if (blizKeepSnowToggle) blizKeepSnowToggle.disabled = false;
+                if (optBlizSnow) optBlizSnow.classList.add('disabled-element');
+                if (optBlizKeepSnow) optBlizKeepSnow.classList.remove('disabled-element');
+            } else {
+                btnStartBliz.style.display = 'block'; btnStopBliz.style.display = 'none';
+                btnStopBliz.disabled = false;
+                btnStopBliz.style.pointerEvents = 'auto';
+                btnStopBliz.style.opacity = '1';
+                btnStopBliz.innerHTML = '<i class="fas fa-stop"></i> Lopeta Event';
+                const blockStartBlizzard = currentState.activeEvent !== 'none' || currentState.eventLocked;
+                btnStartBliz.style.opacity = blockStartBlizzard ? '0.5' : '1';
+                btnStartBliz.style.pointerEvents = blockStartBlizzard ? 'none' : 'auto';
+                btnStartBliz.innerHTML = '<i class="fas fa-play"></i> Aloita Event';
+                const blizzardCleanupPending = currentState.eventLocked && currentState.eventLockReason === 'blizzard_cleanup';
+                statusBliz.textContent = blizzardCleanupPending ? 'Odota' : 'Ei aktiivinen'; statusBliz.className = blizzardCleanupPending ? 'status warning' : 'status';
+                document.getElementById('blizzardIntensitySlider').disabled = false;
+                if (optBlizInt) optBlizInt.classList.remove('disabled-element');
+                document.getElementById('blizzardSnowToggle').disabled = false;
+                if (blizKeepSnowToggle) blizKeepSnowToggle.disabled = false;
+                if (optBlizSnow) optBlizSnow.classList.remove('disabled-element');
+                if (optBlizKeepSnow) optBlizKeepSnow.classList.remove('disabled-element');
+            }
+            updateBlizzardKeepSnowVisibility();
+
+            // säkkisumu
+            const btnStartFog = document.getElementById('startHeavyfogBtn');
+            const btnStopFog = document.getElementById('stopHeavyfogBtn');
+            const statusFog = document.getElementById('status-heavyfog');
+            const optFogDensity = document.getElementById('opt-fogDensity');
+
+            if (currentState.activeEvent === 'heavyfog') {
+                const canStopFog = !!(currentState.eventOptions && currentState.eventOptions.heavyfog && currentState.eventOptions.heavyfog.canStop);
+                btnStartFog.style.display = 'none'; btnStopFog.style.display = 'block';
+                btnStopFog.disabled = !canStopFog;
+                btnStopFog.style.pointerEvents = canStopFog ? 'auto' : 'none';
+                btnStopFog.style.opacity = canStopFog ? '1' : '0.75';
+                statusFog.textContent = canStopFog ? 'Aktiivinen' : 'Odota';
+                statusFog.className = canStopFog ? 'status active-text' : 'status warning';
+            } else {
+                btnStartFog.style.display = 'block'; btnStopFog.style.display = 'none';
+                btnStopFog.disabled = false;
+                btnStopFog.style.pointerEvents = 'auto';
+                btnStopFog.style.opacity = '1';
+                const blockStartFog = currentState.activeEvent !== 'none' || currentState.eventLocked;
+                btnStartFog.style.opacity = blockStartFog ? '0.5' : '1';
+                btnStartFog.style.pointerEvents = blockStartFog ? 'none' : 'auto';
+                btnStartFog.innerHTML = '<i class="fas fa-play"></i> Aloita Event';
+                const fogCleanupPending = currentState.eventLocked && currentState.eventLockReason === 'heavyfog_cleanup';
+                statusFog.textContent = fogCleanupPending ? 'Odota' : 'Ei aktiivinen'; statusFog.className = fogCleanupPending ? 'status warning' : 'status';
+            }
+
+            // maanjäristys
+            const btnStartEq = document.getElementById('startEarthquakeBtn');
+            const btnStopEq = document.getElementById('stopEarthquakeBtn');
+            const statusEq = document.getElementById('status-earthquake');
+            const optEqW = document.getElementById('opt-eqW');
+            const optEqI = document.getElementById('opt-eqIntensity');
+
+            if (currentState.activeEvent === 'earthquake') {
+                btnStartEq.style.display = 'none'; btnStopEq.style.display = 'block';
+                statusEq.textContent = 'Aktiivinen'; statusEq.className = 'status active-text';
+
+                document.getElementById('eqWarningToggle').disabled = true;
+                optEqW.classList.add('disabled-element');
+                document.getElementById('eqIntensitySlider').disabled = true;
+                optEqI.classList.add('disabled-element');
+            } else {
+                btnStartEq.style.display = 'block'; btnStopEq.style.display = 'none';
+                const blockStartEq = currentState.activeEvent !== 'none' || currentState.eventLocked;
+                btnStartEq.style.opacity = blockStartEq ? '0.5' : '1';
+                btnStartEq.style.pointerEvents = blockStartEq ? 'none' : 'auto';
+                btnStartEq.innerHTML = '<i class="fas fa-play"></i> Aloita Event';
+                statusEq.textContent = 'Ei aktiivinen'; statusEq.className = 'status';
+
+                document.getElementById('eqWarningToggle').disabled = false;
+                optEqW.classList.remove('disabled-element');
+                document.getElementById('eqIntensitySlider').disabled = false;
+                optEqI.classList.remove('disabled-element');
+            }
+
+            // tulva
+            const btnStartNow = document.getElementById('floodStartNowBtn');
+            const btnStartTimer = document.getElementById('floodStartTimerBtn');
+            const btnStopFlood = document.getElementById('floodStopBtn');
+            const btnResetFlood = document.getElementById('floodResetBtn');
+            const droppingText = document.getElementById('floodDroppingText');
+            const timerRow = document.getElementById('floodTimerRow');
+            const statusFlood = document.getElementById('status-flood');
+            const optFloodH = document.getElementById('opt-floodH');
+            const floodHeightSlider = document.getElementById('floodHeightSlider');
+            const floodRateSlider = document.getElementById('floodRateSlider');
+            const floodUiState = getFloodUiState();
+            const hasFloodActivity = floodUiState.timer || floodUiState.active || floodUiState.dropping || floodUiState.resetting || currentState.activeEvent === 'flood';
+            const floodAtTargetHeight = isFloodAtTargetHeight();
+
+            [btnStartNow, btnStartTimer, btnStopFlood, btnResetFlood].forEach(btn => {
+                btn.disabled = floodUiState.pending;
+                btn.style.pointerEvents = floodUiState.pending ? 'none' : 'auto';
+                btn.style.opacity = floodUiState.pending ? '0.85' : '1';
+            });
+
+            if (hasFloodActivity) {
+                btnResetFlood.style.display = 'block';
+                optFloodH.classList.remove('disabled-element');
+                floodHeightSlider.disabled = true;
+                floodRateSlider.disabled = !floodAtTargetHeight;
+                floodHeightSlider.style.opacity = '0.45';
+                floodRateSlider.style.opacity = floodAtTargetHeight ? '1' : '0.45';
+                document.getElementById('floodWarningToggle').disabled = true;
+                document.getElementById('opt-floodW').classList.add('disabled-element');
+
+                if (floodUiState.timer) {
+                    btnResetFlood.style.gridColumn = 'span 2';
+                    timerRow.style.display = 'flex';
+                    document.getElementById('floodTimerText').textContent = floodUiState.timerMinutes + " MIN";
+                    btnStartNow.style.display = 'none';
+                    btnStartTimer.style.display = 'none';
+                    btnStopFlood.style.display = 'none';
+                    droppingText.style.display = 'none';
+                    statusFlood.textContent = 'Ajastin käynnissä'; statusFlood.className = 'status warning';
+                } else if (floodUiState.resetting) {
+                    btnResetFlood.style.gridColumn = 'span 2';
+                    timerRow.style.display = 'none';
+                    btnStartNow.style.display = 'none';
+                    btnStartTimer.style.display = 'none';
+                    btnStopFlood.style.display = 'none';
+                    droppingText.style.display = 'none';
+                    statusFlood.textContent = 'Odota'; statusFlood.className = 'status warning';
+                } else if (floodUiState.active || floodUiState.dropping) {
+                    btnResetFlood.style.gridColumn = 'span 1';
+                    timerRow.style.display = 'none';
+                    btnStartNow.style.display = 'none';
+                    btnStartTimer.style.display = 'none';
+
+                    if (floodUiState.dropping) {
+                        btnStopFlood.style.display = 'none';
+                        droppingText.style.display = 'block';
+                        statusFlood.textContent = 'Odota'; statusFlood.className = 'status warning';
+                    } else {
+                        btnStopFlood.style.display = 'block';
+                        droppingText.style.display = 'none';
+
+                        let waterStatus = 'Aktiivinen';
+                        const floodStartPending = floodUiState.pending && pendingFloodAction === 'start_now';
+                        if (floodStartPending || (Math.abs(currentState.currentActualFloodLevel - currentState.targetFloodLevel) > 0.05 && currentState.currentActualFloodLevel < currentState.targetFloodLevel)) {
+                            waterStatus = 'Odota';
+                            statusFlood.className = 'status warning';
+                        } else {
+                            statusFlood.className = 'status active-text';
+                        }
+                        statusFlood.textContent = waterStatus;
+                    }
+                } else {
+                    btnResetFlood.style.gridColumn = 'span 2';
+                    timerRow.style.display = 'none';
+                    btnStartNow.style.display = 'none';
+                    btnStartTimer.style.display = 'none';
+                    btnStopFlood.style.display = 'none';
+                    droppingText.style.display = 'none';
+                    statusFlood.textContent = 'Aktiivinen'; statusFlood.className = 'status active-text';
+                }
+            } else {
+                btnResetFlood.style.gridColumn = 'span 2';
+                timerRow.style.display = 'none';
+                btnStopFlood.style.display = 'none';
+                btnResetFlood.style.display = 'none';
+                droppingText.style.display = 'none';
+                btnStartNow.style.display = 'block';
+                btnStartTimer.style.display = 'block';
+                optFloodH.classList.remove('disabled-element');
+                floodHeightSlider.disabled = false;
+                floodRateSlider.disabled = false;
+                floodHeightSlider.style.opacity = '1';
+                floodRateSlider.style.opacity = '1';
+
+                document.getElementById('floodWarningToggle').disabled = false;
+                document.getElementById('opt-floodW').classList.remove('disabled-element');
+
+                let disabled = (currentState.activeEvent !== 'none') || currentState.eventLocked;
+                btnStartNow.style.opacity = disabled ? '0.5' : '1';
+                btnStartNow.style.pointerEvents = disabled ? 'none' : 'auto';
+                btnStartNow.disabled = disabled;
+                btnStartTimer.style.opacity = disabled ? '0.5' : '1';
+                btnStartTimer.style.pointerEvents = disabled ? 'none' : 'auto';
+                btnStartTimer.disabled = disabled;
+                statusFlood.textContent = 'Ei aktiivinen'; statusFlood.className = 'status';
+            }
+        }
+
+        function updateUI() {
+            const hw = document.getElementById('homeWeather');
+            const wpCW = document.getElementById('weatherPageCurrentWeather');
+
+            hw.textContent = weatherNames[currentState.currentWeather] || currentState.currentWeather;
+            hw.style.fontSize = "32px";
+            if (wpCW) { wpCW.textContent = weatherNames[currentState.currentWeather] || currentState.currentWeather; wpCW.style.fontSize = "32px"; }
+
+            document.getElementById('homeTime').textContent = formatTime(currentState.currentHour, currentState.currentMinute);
+
+            const weatherStatus = document.getElementById('weatherFreezeStatus');
+            if (currentState.weatherFrozen) {
+                weatherStatus.innerHTML = '<span>Jäädytys:</span> Kyllä'; weatherStatus.className = 'status-badge on';
+            } else {
+                weatherStatus.innerHTML = '<span>Jäädytys:</span> Ei'; weatherStatus.className = 'status-badge off';
+            }
+
+            const timeStatus = document.getElementById('timeFreezeStatus');
+            if (currentState.syncWithRealTime) {
+                timeStatus.innerHTML = '<span>Tila:</span> Reaaliaika'; timeStatus.className = 'status-badge on';
+            } else if (currentState.timeFrozen) {
+                timeStatus.innerHTML = '<span>Jäädytys:</span> Kyllä'; timeStatus.className = 'status-badge on';
+            } else {
+                timeStatus.innerHTML = '<span>Jäädytys:</span> Ei'; timeStatus.className = 'status-badge off';
+            }
+
+            let modeName = 'Normaalitila';
+            let modeDesc = 'Sää ja aika vaihtuvat automaattisesti';
+            let modeIcon = '☀️';
+
+            if (currentState.activeEvent === 'halloween') { modeName = 'Halloween'; modeDesc = 'Aika lukittu yöhön.'; modeIcon = '🎃'; }
+            else if (currentState.activeEvent === 'heavyfog') { modeName = 'Säkkisumu'; modeDesc = 'Tiheä sumu peittää kaupungin.'; modeIcon = '🌫️'; }
+            else if (currentState.activeEvent === 'earthquake') { modeName = 'Maanjäristys'; modeDesc = 'Kaupunki tärisee.'; modeIcon = '🏠'; }
+            else if (currentState.activeEvent === 'flood') { modeName = 'Vedenpaisumus'; modeDesc = 'Tulva käynnissä.'; modeIcon = '🌊'; }
+            else if (currentState.activeEvent === 'blizzard') { modeName = 'Lumimyrsky'; modeDesc = 'Erittäin voimakas lumimyrsky.'; modeIcon = '❄️'; }
+
+            document.getElementById('currentModeName').textContent = modeName;
+            document.getElementById('currentModeDesc').textContent = modeDesc;
+            document.getElementById('modeIcon').textContent = modeIcon;
+
+            document.getElementById('timePageCurrentTime').textContent = formatTime(currentState.currentHour, currentState.currentMinute);
+
+            updateWeatherTimerUI();
+
+            const snowToggle = document.getElementById('snowOnGroundToggle');
+            if (snowToggle) snowToggle.checked = currentState.snowOnGround || false;
+
+            const rainSlider = document.getElementById('rainSlider');
+            const rainControl = document.getElementById('rainControlContainer');
+            const isRainAllowed = ['RAIN', 'THUNDER', 'CLEARING', 'HALLOWEEN', 'RAIN_HALLOWEEN'].includes(currentState.currentWeather) ||
+                                  currentState.activeEvent === 'halloween' ||
+                                  (currentState.activeEvent === 'flood' && currentState.floodStorm);
+
+            if (rainSlider && rainControl) {
+                let percent = Math.round((currentState.rainLevel || 0) * 100);
+                if (currentState.rainLevel >= 0.99) percent = 100;
+
+                rainSlider.value = percent;
+                document.getElementById('rainValue').textContent = percent + '%';
+
+                if (isRainAllowed) {
+                    rainSlider.disabled = false;
+                    rainControl.classList.remove('disabled-element');
+                } else {
+                    rainSlider.disabled = true;
+                    rainControl.classList.add('disabled-element');
+                }
+            }
+
+            const hypothermiaToggle = document.getElementById('hypothermiaToggle');
+            if (hypothermiaToggle) {
+                const optElement = hypothermiaToggle.closest('.special-option');
+                hypothermiaToggle.checked = currentState.hypothermiaEnabled;
+
+                const isFloodActive = (currentState.activeEvent === 'flood' && !currentState.floodTimerActive) || currentState.isWaterDropping || currentState.floodActive;
+
+                if (isFloodActive) {
+                    hypothermiaToggle.disabled = true;
+                    if (optElement) optElement.classList.add('disabled-element');
+                } else {
+                    hypothermiaToggle.disabled = false;
+                    if (optElement) optElement.classList.remove('disabled-element');
+                }
+            }
+
+            const isWinterCycle = currentState.weatherCycle === 'winter';
+            if(document.getElementById('cycleWinterToggle')) document.getElementById('cycleWinterToggle').checked = isWinterCycle;
+            if(document.getElementById('cycleNormalToggle')) document.getElementById('cycleNormalToggle').checked = !isWinterCycle;
+
+            const isNormalCycle = currentState.weatherCycle === 'normal';
+            if (document.getElementById('basicWeatherGrid')) {
+                if ((currentState.activeEvent !== 'none' && currentState.activeEvent !== 'flood' && currentState.activeEvent !== 'earthquake' && currentState.activeEvent !== 'heavyfog' && currentState.activeEvent !== 'blizzard') || !isNormalCycle) {
+                    document.getElementById('basicWeatherGrid').classList.add('disabled-element');
+                } else {
+                    document.getElementById('basicWeatherGrid').classList.remove('disabled-element');
+                }
+            }
+
+            document.querySelectorAll('.weather-btn').forEach(btn => btn.classList.remove('selected'));
+            if (currentState.activeEvent === 'none' || currentState.activeEvent === 'flood' || currentState.activeEvent === 'earthquake' || currentState.activeEvent === 'heavyfog' || currentState.activeEvent === 'blizzard') {
+                const activeBtn = document.querySelector(`.weather-btn[data-weather-id="${currentState.currentWeather}"]`);
+                if (activeBtn) activeBtn.classList.add('selected');
+            }
+
+            document.querySelectorAll('.event-card').forEach(card => card.classList.remove('active'));
+            if (currentState.activeEvent !== 'none') {
+                const globalActiveCard = document.getElementById('card-' + currentState.activeEvent);
+                if (globalActiveCard) globalActiveCard.classList.add('active');
+            }
+
+            if(document.getElementById('blackoutToggle')) document.getElementById('blackoutToggle').checked = currentState.blackout || false;
+            const vehicleLightsOption = document.getElementById('vehicleLightsOptionContainer');
+            const vehicleLightsToggle = document.getElementById('vehicleLightsToggle');
+
+            if (vehicleLightsToggle) {
+                if (currentState.blackout) {
+                    vehicleLightsToggle.disabled = false;
+                    vehicleLightsToggle.checked = currentState.vehicleLightsDisabled || false;
+                    if (vehicleLightsOption) vehicleLightsOption.classList.remove('disabled-element');
+                } else {
+                    vehicleLightsToggle.disabled = true;
+                    vehicleLightsToggle.checked = false;
+                    if (vehicleLightsOption) vehicleLightsOption.classList.add('disabled-element');
+                }
+            }
+
+            if(document.getElementById('syncRealTimeToggle')) document.getElementById('syncRealTimeToggle').checked = currentState.syncWithRealTime || false;
+
+            if(document.getElementById('floodStormToggle')) document.getElementById('floodStormToggle').checked = currentState.floodStorm;
+            if(document.getElementById('floodSirensToggle')) document.getElementById('floodSirensToggle').checked = currentState.sirensWillActivate;
+            if(document.getElementById('floodWarningToggle')) document.getElementById('floodWarningToggle').checked = currentState.floodWarningEnabled;
+            const floodRateSlider = document.getElementById('floodRateSlider');
+            if (floodRateSlider && document.activeElement !== floodRateSlider) {
+                const rateSource = localFloodRiseRate !== null ? localFloodRiseRate : currentState.floodRiseRate;
+                const rate = Math.max(0.1, Math.min(20, parseFloat(rateSource) || 5.0));
+                currentState.floodRiseRate = rate;
+                floodRateSlider.value = rate;
+                document.getElementById('floodRateValue').textContent = rate.toFixed(1) + ' s/m';
+            }
+
+            if(currentState.eventOptions) {
+                if(currentState.eventOptions.halloween && document.getElementById('halloweenStormToggle')) {
+                    document.getElementById('halloweenStormToggle').checked = currentState.eventOptions.halloween.storm !== false;
+                }
+                if(document.getElementById('fogDensitySlider')) {
+                    const fogSlider = document.getElementById('fogDensitySlider');
+                    const fd = Math.max(10, Math.min(100, Math.round((currentState.eventOptions.fogDensity || 0.5) * 100)));
+                    // slider rauhassa
+                    if (document.activeElement !== fogSlider && parseInt(fogSlider.value) !== fd) {
+                        fogSlider.value = fd;
+                        document.getElementById('fogDensityValue').textContent = fd + '%';
+                    }
+                }
+                if(currentState.eventOptions.earthquake) {
+                    document.getElementById('eqSirensToggle').checked = currentState.eventOptions.earthquake.sirens;
+                    document.getElementById('eqWarningToggle').checked = currentState.eventOptions.earthquake.warning;
+                    if(currentState.eventOptions.earthquake.intensity !== undefined && document.activeElement !== document.getElementById('eqIntensitySlider')) {
+                        const eqI = Math.round(currentState.eventOptions.earthquake.intensity * 100);
+                        document.getElementById('eqIntensitySlider').value = eqI;
+                        document.getElementById('eqIntensityValue').textContent = eqI + '%';
+                    }
+                }
+                if(currentState.eventOptions.blizzard) {
+                    const blizSlider = document.getElementById('blizzardIntensitySlider');
+                    if(blizSlider && currentState.eventOptions.blizzard.intensity !== undefined && document.activeElement !== blizSlider) {
+                        const bI = Math.max(10, Math.min(100, Math.round(currentState.eventOptions.blizzard.intensity * 100)));
+                        blizSlider.value = bI;
+                        document.getElementById('blizzardIntensityValue').textContent = bI + '%';
+                    }
+                    const blizSnow = document.getElementById('blizzardSnowToggle');
+                    if(blizSnow) {
+                        blizSnow.checked = currentState.eventOptions.blizzard.addSnow !== false;
+                    }
+                    const blizKeepSnow = document.getElementById('blizzardKeepSnowToggle');
+                    if(blizKeepSnow) {
+                        blizKeepSnow.checked = currentState.eventOptions.blizzard.keepSnow !== false;
+                    }
+                    updateBlizzardKeepSnowVisibility();
+                }
+            }
+
+            updateEventButtons();
+            updateFreezeButtons();
+            updateOverlays();
+        }
+
+        function startSpecialEvent(eventName) {
+            let options = {};
+            if (eventName === 'halloween') {
+                options.storm = document.getElementById('halloweenStormToggle').checked;
+            } else if (eventName === 'heavyfog') {
+                options.density = parseFloat(document.getElementById('fogDensitySlider').value) / 100.0;
+            } else if (eventName === 'earthquake') {
+                options.sirens = document.getElementById('eqSirensToggle').checked;
+                options.warning = document.getElementById('eqWarningToggle').checked;
+                options.intensity = parseFloat(document.getElementById('eqIntensitySlider').value) / 100.0;
+            } else if (eventName === 'blizzard') {
+                options.intensity = parseFloat(document.getElementById('blizzardIntensitySlider').value) / 100.0;
+                options.addSnow = document.getElementById('blizzardSnowToggle').checked;
+                options.keepSnow = document.getElementById('blizzardKeepSnowToggle').checked;
+            }
+            fetchPost('startSpecialEvent', { eventName: eventName, options: options });
+        }
+
+        function stopSpecialEvent() {
+            fetchPost('stopSpecialEvent', {});
+        }
+
+        function setFloodAction(action) {
+            let height = Math.floor(parseFloat(document.getElementById('floodHeightSlider').value));
+            if (height < 1 || isNaN(height)) height = 1;
+
+            let rate = parseFloat(document.getElementById('floodRateSlider').value);
+            if (isNaN(rate) || rate <= 0) rate = 0.01;
+
+            const storm = document.getElementById('floodStormToggle').checked;
+            const sirens = document.getElementById('floodSirensToggle').checked;
+            const warning = document.getElementById('floodWarningToggle').checked;
+
+            pendingFloodAction = action;
+            pendingFloodActionAt = Date.now();
+            updateUI();
+
+            fetchPost('setFloodAction', { action: action, targetHeight: height, storm: storm, sirens: sirens, warning: warning, riseRate: rate })
+                .catch(() => {
+                    pendingFloodAction = null;
+                    pendingFloodActionAt = 0;
+                    updateUI();
+                });
+        }
+
+        function updateFreezeButtons() {
+            const weatherFreezeToggle = document.getElementById('weatherFreezeToggle');
+            const timeFreezeToggle = document.getElementById('timeFreezeToggle');
+            if (weatherFreezeToggle) weatherFreezeToggle.checked = currentState.weatherFrozen || false;
+            if (timeFreezeToggle) timeFreezeToggle.checked = currentState.timeFrozen || false;
+        }
+
+        function updateOverlays() {
+            const weatherArea = document.getElementById('weatherControlsArea');
+            if (weatherArea) {
+                let wOverlay = weatherArea.querySelector('.disabled-overlay');
+                if (isWeatherFullyLocked()) {
+                    if (!wOverlay) {
+                        wOverlay = document.createElement('div');
+                        wOverlay.className = 'disabled-overlay';
+                        wOverlay.innerHTML = '<div class="disabled-text">⚠️ Sään hallinta on estetty<br><span style="font-size: 11px; font-weight: 400; color: rgba(255,255,255,0.6); margin-top: 6px; display: block;">Eventti on lukinnut sään</span></div>';
+                        weatherArea.appendChild(wOverlay);
+                    }
+                } else {
+                    if (wOverlay) wOverlay.remove();
+                }
+            }
+
+            const timeWrapper = document.getElementById('allTimeControlsWrapper');
+            if (timeWrapper) {
+                let tOverlay = timeWrapper.querySelector('.disabled-overlay');
+                if (isSpecialModeTimeLocked()) {
+                    if (!tOverlay) {
+                        tOverlay = document.createElement('div');
+                        tOverlay.className = 'disabled-overlay';
+                        tOverlay.innerHTML = '<div class="disabled-text">⚠️ Ajan hallinta on estetty<br><span style="font-size: 11px; font-weight: 400; color: rgba(255,255,255,0.6); margin-top: 6px; display: block;">Eventti on lukinnut ajan</span></div>';
+                        timeWrapper.appendChild(tOverlay);
+                    }
+                } else {
+                    if (tOverlay) tOverlay.remove();
+                }
+            }
+        }
+
+        function formatTime(hour, minute) {
+            return String(hour || 0).padStart(2, '0') + ':' + String(minute || 0).padStart(2, '0');
+        }
+
+        function switchPage(pageNum) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            const page = document.getElementById('page' + pageNum);
+            if (page) page.classList.add('active');
+            const navItems = document.querySelectorAll('.nav-item');
+            if (navItems[pageNum - 1]) navItems[pageNum - 1].classList.add('active');
+        }
+
+        function closePanel() {
+            fetch(`https://${GetParentResourceName()}/closePanel`, { method: 'POST' });
+        }
+
+        function fetchPost(endpoint, data) {
+            return fetch(`https://${GetParentResourceName()}/${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        }
+
+        function toggleWeatherCycle(cycle) {
+            currentState.weatherCycle = cycle;
+            if (cycle === 'winter') {
+                currentState.currentWeather = currentState.winterType || 'SNOWLIGHT';
+            } else if (cycle === 'normal') {
+                currentState.currentWeather = 'CLEAR';
+            }
+            updateUI();
+            fetchPost('setWeatherCycle', { cycle: cycle });
+        }
+
+        function toggleHalloweenStorm(state) {
+            if (currentState.activeEvent === 'halloween') {
+                fetchPost('updateEventOption', { eventName: 'halloween', option: 'storm', value: state });
+            }
+        }
+
+        function toggleHypothermia(enabled) {
+            currentState.hypothermiaEnabled = enabled;
+            fetchPost('toggleHypothermia', { enabled: enabled });
+        }
+
+        function toggleSnow(enabled) {
+            currentState.snowOnGround = enabled;
+            updateUI();
+            fetchPost('toggleSnow', { enabled: enabled });
+        }
+
+        function updateRainLabel(id, percentValue) {
+            document.getElementById(id).textContent = percentValue + '%';
+        }
+
+        function setRainLevel(percentValue) {
+            let level = percentValue / 100.0;
+            if (level > 0.98) level = 0.99;
+            currentState.rainLevel = level;
+            fetchPost('setRainLevel', { level: level });
+        }
+
+        function setWeather(weather) {
+            if (isWeatherFullyLocked()) return;
+            fetchPost('setWeather', { weather: weather });
+        }
+
+        function setTime() {
+            if (isSpecialModeTimeLocked()) return;
+            if (currentState.syncWithRealTime) {
+                toggleSyncWithRealTime(false);
+            }
+            const hour = parseInt(document.getElementById('hourInput').value) || 0;
+            const minute = parseInt(document.getElementById('minuteInput').value) || 0;
+            fetchPost('setTime', { hour: hour, minute: minute });
+        }
+
+        function setTimeQuick(hour, minute) {
+            if (isSpecialModeTimeLocked()) return;
+            if (currentState.syncWithRealTime) {
+                toggleSyncWithRealTime(false);
+            }
+            fetchPost('setTime', { hour: hour, minute: minute });
+        }
+
+        function toggleWeatherFreeze(frozen) {
+            currentState.weatherFrozen = frozen;
+            fetchPost('toggleWeatherFreeze', { frozen: frozen });
+        }
+
+        function toggleTimeFreeze(frozen) {
+            if (currentState.syncWithRealTime && frozen) {
+                toggleSyncWithRealTime(false);
+            }
+            currentState.timeFrozen = frozen;
+            fetchPost('toggleTimeFreeze', { frozen: frozen });
+        }
+
+        function toggleBlackout(enabled) {
+            currentState.blackout = enabled;
+            if (!enabled) currentState.vehicleLightsDisabled = false;
+            updateUI();
+            fetchPost('toggleBlackout', { enabled: enabled });
+        }
+
+        function toggleVehicleLights(enabled) {
+            if (!currentState.blackout) return;
+            fetchPost('toggleVehicleLights', { disabled: enabled });
+        }
+
+        function toggleSyncWithRealTime(enabled) {
+            if (isSpecialModeTimeLocked()) return;
+            currentState.syncWithRealTime = enabled;
+            if (enabled) {
+                currentState.timeFrozen = false;
+                const timeFreezeToggle = document.getElementById('timeFreezeToggle');
+                if(timeFreezeToggle) timeFreezeToggle.checked = false;
+            }
+            updateUI();
+            fetchPost('toggleSyncWithRealTime', { enabled: enabled });
+        }
+        // sulkunappi
+        let activeCloseKey = "Escape";
+        window.addEventListener('message', function(event) {
+            const data = event.data;
+            if (data.type === 'show') {
+                if (data.closeKey) {
+                    activeCloseKey = data.closeKey;
+                }
+                document.body.classList.add('visible');
+                if (data.state) currentState = { ...currentState, ...data.state };
+                clearLocalFloodRateIfIdle();
+                generateWeatherButtons();
+                syncPendingFloodAction();
+                updateUI();
+            } else if (data.type === 'hide') {
+                document.body.classList.remove('visible');
+            } else if (data.type === 'updateState') {
+                currentState = { ...currentState, ...data.state };
+                if (data.state && data.state.floodRiseRate !== undefined) clearLocalFloodRateIfIdle();
+                syncPendingFloodAction();
+                updateUI();
+            }
+        });
+
+        // sulkunappi synkassa
+        window.addEventListener('keydown', function(event) {
+            if (event.key === activeCloseKey) {
+                fetch(`https://${GetParentResourceName()}/closePanel`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json; charset=UTF-8' },
+                    body: JSON.stringify({})
+                });
+            }
+        });
+    </script>
+</body>
+</html>
