@@ -916,7 +916,7 @@ CreateThread(function()
             if timeInWater == maxT then
                 if hypoPhase ~= 2 then
                     hypoPhase = 2
-                    Notify("Olet saanut hypotermian! Palaa välittömästi takaisin rannalle lämmittelemään.", "error", 10000)
+                    Notify("Voimasi ehtyivät! On niin kylmää vettä... Takaisin rannalle siitä!", "error", 10000)
                     AnimpostfxPlay("Dont_tazeme_bro", 0, true)
                     SetPedMovementClipset(ped, "move_m@injured", 0.5)
                     hypoActiveTime = 0
@@ -929,20 +929,20 @@ CreateThread(function()
                 
                 if hypoActiveTime >= maxHypo then
                     SetEntityHealth(ped, 0)
-                    Notify("Kuolit hypotermiaan.", "error", 5000)
+                    Notify("Oi voi...", "error", 5000)
                 else
                     local currentWarning = math.floor(hypoActiveTime / interval)
                     if currentWarning > lastHypoWarning and currentWarning <= 2 then
                         lastHypoWarning = currentWarning
                         local timeLeft = math.ceil(maxHypo - hypoActiveTime)
-                        Notify("Hypotermia pahenee! Aikaa jäljellä: " .. timeLeft .. "s", "warning", 5000)
+                        Notify("Olisiko aika jo palata rannalle? Aikaa jäljellä: " .. timeLeft .. "s", "warning", 5000)
                     end
                 end
             elseif timeInWater > 0 then
                 if timeInWater >= (maxT / 2.0) then
                     if hypoPhase == 0 then
                         hypoPhase = 1
-                        Notify("Vesi on jäätävää! Hypotermia iskee pian, nouse ylös.", "warning", 7000)
+                        Notify("Kylmää vettä... Kannattaisko mennä rannalle päin?", "warning", 7000)
                     elseif hypoPhase == 2 and not IsPedSwimming(ped) and not IsPedSwimmingUnderWater(ped) then
                         -- rannalla märkä
                         hypoPhase = 3
