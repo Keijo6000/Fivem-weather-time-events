@@ -225,17 +225,17 @@ local function validateNormalWeatherTypes()
         totalChance = totalChance + chance
 
         if chance < 0 then
-            print(('[%s] VAROITUS: NormalWeatherTypes[%d] (%s) sisältää negatiivisen painon (%s).'):format(ResourceName, index, tostring(weather.type), tostring(weather.chance)))
+            print(('[%s] VAROITUS: NormalWeatherTypes[%d] (%s) sisältää negatiivisen prosenttiarvon (%s).'):format(ResourceName, index, tostring(weather.type), tostring(weather.chance)))
         end
     end
 
     if #weatherTypes == 0 then
-        print(('[%s] VAROITUS: NormalWeatherTypes on tyhjä, joten käytetään CLEAR-säätä.'):format(ResourceName))
+        print(('[%s] VAROITUS: NormalWeatherTypes on tyhjä.'):format(ResourceName))
         return
     end
 
     if totalChance <= 0 then
-        print(('[%s] VAROITUS: NormalWeatherTypes-painojen summa on %s, joten käytetään CLEAR-säätä.'):format(ResourceName, tostring(totalChance)))
+        print(('[%s] VAROITUS: NormalWeatherTypes-painojen summa on %s.'):format(ResourceName, tostring(totalChance)))
         return
     end
 
@@ -470,7 +470,7 @@ AddEventHandler('weather:startSpecialEvent', function(eventName, options)
         end
 
         if WeatherState.eventOptions.earthquake.warning then
-            TriggerClientEvent('txcl:showAnnouncement', -1, "Äärimmäisen voimakas maanjäristys iskee alueelle. Pysykää poissa rakennusten lähettyviltä.", "VAARATIEDOTE") --tiedote
+            TriggerClientEvent('txcl:showAnnouncement', -1, "Maanjäristys iskee alueelle. Pysy suojassa.", "VAARATIEDOTE") --tiedote
         end
 
         CreateThread(function()
@@ -805,7 +805,7 @@ AddEventHandler('weather:setFloodAction', function(action, targetHeight, stormEn
         syncState() --state kaikille
 
         if WeatherState.floodWarningEnabled then
-            TriggerClientEvent('txcl:showAnnouncement', -1, "Meriveden korkeus nousee vaarallisen korkealle. Kaupungin asukkaita kehotetaan hakeutumaan korkealle paikalle välittömästi.", "VAARATIEDOTE") --tiedote
+            TriggerClientEvent('txcl:showAnnouncement', -1, "Meriveden korkeus nousee vaarallisen korkealle. Hakeudu korkealle paikalle.", "VAARATIEDOTE") --tiedote
         end
 
     elseif action == 'start_15min' then
@@ -833,7 +833,7 @@ AddEventHandler('weather:setFloodAction', function(action, targetHeight, stormEn
         syncState()
 
         if WeatherState.floodWarningEnabled then
-            TriggerClientEvent('txcl:showAnnouncement', -1, "Meriveden korkeus nousee vaarallisen korkealle. Kaupungin asukkaita kehotetaan hakeutumaan korkealle paikalle.", "VAARATIEDOTE")
+            TriggerClientEvent('txcl:showAnnouncement', -1, "Meriveden korkeus nousee vaarallisen korkealle. Hakeudu korkealle paikalle.", "VAARATIEDOTE")
         end
 
     elseif action == 'stop' then
@@ -1016,7 +1016,7 @@ CreateThread(function()
 
             if WeatherState.floodTimerMinutes == 5 then
                 if WeatherState.floodWarningEnabled then
-                    TriggerClientEvent('txcl:showAnnouncement', -1, "Meriveden korkeus nousee vaarallisen korkealle. Hakeudu korkealle paikalle!", "VAARATIEDOTE")
+                    TriggerClientEvent('txcl:showAnnouncement', -1, "Meriveden korkeus nousee vaarallisen korkealle. Hakeudu korkealle paikalle.", "VAARATIEDOTE")
                 end
             elseif WeatherState.floodTimerMinutes <= 0 then
                 if WeatherState.sirensWillActivate then
