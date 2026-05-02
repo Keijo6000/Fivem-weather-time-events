@@ -286,8 +286,8 @@
         <div class="main-content">
             <div class="page active" id="page1">
                 <div class="page-container">
-                    <h2 class="page-title">Tilanne</h2>
-                    <p class="page-subtitle">Nykyinen sää ja aika palvelimella</p>
+                    <h2 class="page-title">Yleiskatsaus</h2>
+                    <p class="page-subtitle">Palvelimen tila</p>
 
                     <div class="status-card" style="background: linear-gradient(135deg, rgba(255, 165, 2, 0.1) 0%, rgba(255, 165, 2, 0.03) 100%); border-color: rgba(255, 165, 2, 0.25); margin-bottom: 20px;">
                         <div style="display: flex; align-items: center; gap: 12px;">
@@ -317,7 +317,7 @@
                         <span class="icon" id="modeIcon">☀️</span>
                         <div class="text">
                             <strong id="currentModeName">Normaalitila</strong>
-                            <span id="currentModeDesc">Sää ja aika vaihtuvat automaattisesti</span>
+                            <span id="currentModeDesc">Sää ja aika normaalitilassa</span>
                         </div>
                     </div>
 
@@ -326,7 +326,7 @@
                             <span class="icon" style="color: #00d4ff;">🥶</span>
                             <div class="text">
                                 <h4>Hypotermia (Selviytyminen)</h4>
-                                <p>Pelaajat kärsivät kylmyydestä, jos he ovat vedessä liian kauan.</p>
+                                <p>Estetään pelaajien liiallinen uiminen (powergame) vesistöissä pakottamalla ne uimaan kohti rantaa.</p>
                             </div>
                         </div>
                         <label class="toggle-switch">
@@ -338,7 +338,7 @@
                     <div class="btn-row">
                         <button class="btn" onclick="switchPage(2)"><i class="fas fa-cloud-sun"></i> Hallitse Säätä</button>
                         <button class="btn btn-secondary" onclick="switchPage(3)"><i class="fas fa-clock"></i> Hallitse Aikaa</button>
-                        <button class="btn btn-modes" onclick="switchPage(4)"><i class="fas fa-star"></i> Tilat</button>
+                        <button class="btn btn-modes" onclick="switchPage(4)"><i class="fas fa-star"></i> Tilat & Eventit</button>
                     </div>
                 </div>
             </div>
@@ -349,7 +349,7 @@
 
                     <p class="page-subtitle">
                         Valitse haluamasi säätila manuaalisesti
-                        <span class="weather-timer" id="weatherTimerDisplay" style="display: none;">Vaihtuu: -- min</span>
+                        <span class="weather-timer" id="weatherTimerDisplay" style="display: none;">Sää vaihtuu: -- min</span>
                     </p>
 
                     <div class="status-card" style="margin-bottom: 24px;">
@@ -380,7 +380,7 @@
                     <div class="control-area" id="environmentControlsArea" style="margin-top: 18px;">
                         <div class="section-title" style="margin-top: 0;">Ympäristö</div>
                         <div class="special-option" style="margin-bottom: 14px;">
-                            <div class="info"><span class="icon">⛄</span><div class="text"><h4>Lumi maahan</h4><p>Pakottaa lumen maastoon</p></div></div>
+                            <div class="info"><span class="icon">⛄</span><div class="text"><h4>Lumi maahan</h4><p>Pakottaa lumen maahan (välitön)</p></div></div>
                             <label class="toggle-switch"><input type="checkbox" id="snowOnGroundToggle" onchange="toggleSnow(this.checked)"><span class="toggle-slider"></span></label>
                         </div>
                         <div class="special-option" id="rainControlContainer" style="margin-bottom: 14px; background: rgba(0,0,0,0.2); padding: 14px 20px; display: block;">
@@ -423,7 +423,7 @@
                                 <div class="quick-time-btn" onclick="setTimeQuick(18, 0)"><span class="time">18:00</span><span class="label">Iltapäivä</span></div>
                             </div>
 
-                            <div class="section-title">Manuaalinen Asetus</div>
+                            <div class="section-title">Aseta Manuaalisesti</div>
                             <div class="time-management-row">
                                 <div class="time-input-group" style="margin-bottom: 0;">
                                     <input type="number" class="time-input" id="hourInput" min="0" max="23" placeholder="00">
@@ -435,7 +435,7 @@
                         </div>
 
                         <div class="special-option" id="syncOptionContainer" style="margin-top: 14px; margin-bottom: 0;">
-                            <div class="info"><span class="icon">🔄</span><div class="text"><h4>Synkronoi Suomen Aikaan</h4><p>Seuraa oikeaa kelloa automaattisesti</p></div></div>
+                            <div class="info"><span class="icon">🔄</span><div class="text"><h4>Synkronoi Reaaliaikaan</h4><p>Palvelimen kello seuraa oikeaa kelloa automaattisesti</p></div></div>
                             <label class="toggle-switch"><input type="checkbox" id="syncRealTimeToggle" onchange="toggleSyncWithRealTime(this.checked)"><span class="toggle-slider"></span></label>
                         </div>
 
@@ -449,7 +449,7 @@
             <div class="page" id="page4">
                 <div class="page-container">
                     <h2 class="page-title">Tilat & Eventit</h2>
-                    <p class="page-subtitle">Valitse ja käynnistä erikoistapahtumia palvelimelle</p>
+                    <p class="page-subtitle">Käynnistä erikoistapahtumia palvelimella</p>
 
                     <div class="events-container" style="flex: 1; overflow-y: auto; padding-right: 10px;">
 
@@ -458,7 +458,7 @@
                                 <i class="fas fa-water"></i>
                                 <div class="info">
                                     <h3>Vedenpaisumus</h3>
-                                    <p>Kaupunki peittyy veteen, hallitse tulvaa.</p>
+                                    <p>Kaupunki peittyy veteen</p>
                                 </div>
                                 <div class="status" id="status-flood">Ei aktiivinen</div>
                             </div>
@@ -477,13 +477,13 @@
                                             <input type="range" id="floodHeightSlider" min="1" max="100" step="1" value="25" style="flex: 1; -webkit-appearance: none; height: 10px; border-radius: 5px; background: rgba(255, 255, 255, 0.15); outline: none; cursor: pointer;" oninput="updateFloodHeight(this.value)">
                                             <span class="slider-value" id="floodHeightValue" style="min-width: 70px; text-align: right; color: #00d4ff; font-weight: bold; font-size: 16px;">25 m</span>
                                         </div>
-                                        <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; text-align: center; line-height: 1.4;">10m = Pieni<br>25m = Sopiva<br>>50m = Täystuho</div>
+                                        <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; text-align: center; line-height: 1.4;">10m = Pieni tulva<br>25m = Sopiva tulva<br>>50m = Täystuho</div>
                                         <h3 style="margin-bottom: 0; font-size: 11px; text-transform: uppercase; color: rgba(255,255,255,0.5);">Nousuaika (s/m)</h3>
                                         <div class="time-input-group" style="width: 100%; margin-bottom: 0;">
                                             <input type="range" id="floodRateSlider" min="0.1" max="20" step="0.1" value="5" style="flex: 1; -webkit-appearance: none; height: 10px; border-radius: 5px; background: rgba(255, 255, 255, 0.15); outline: none; cursor: pointer;" oninput="updateFloodRate(this.value)" onchange="commitFloodRate(this.value)">
                                             <span class="slider-value" id="floodRateValue" style="min-width: 80px; text-align: right; color: #00d4ff; font-weight: bold; font-size: 16px;">5.0 s/m</span>
                                         </div>
-                                        <div style="font-size: 11px; color: rgba(255,255,255,0.4); text-align: center; line-height: 1.4;">1s/m = Hyökyaalto<br>5s/m = Nopea nousu<br>20s/m = Hidas tulviminen</div>
+                                        <div style="font-size: 11px; color: rgba(255,255,255,0.4); text-align: center; line-height: 1.4;"><1s/m = Nopea nousu<br>5s/m = Sopiva nousu<br>20s/m = Hidas tulviminen</div>
                                     </div>
                                 </div>
 
@@ -492,7 +492,7 @@
                                         <span class="icon">📢</span>
                                         <div class="text">
                                             <h4>Vaaratiedote</h4>
-                                            <p>Lähettää varoituksen pelaajille.</p>
+                                            <p>Lähettää varoituksen pelaajille ennen tulvaa</p>
                                         </div>
                                     </div>
                                     <label class="toggle-switch">
@@ -506,7 +506,7 @@
                                         <span class="icon">⛈️</span>
                                         <div class="text">
                                             <h4>Myrsky</h4>
-                                            <p>Aseta myrskysää tulvan ajaksi.</p>
+                                            <p>Aseta myrskysää tulvan ajaksi</p>
                                         </div>
                                     </div>
                                     <label class="toggle-switch">
@@ -520,7 +520,7 @@
                                         <span class="icon">🚨</span>
                                         <div class="text">
                                             <h4>Väestönsuojasireenit</h4>
-                                            <p>Toistaa hätäsireenin automaattisesti kun tulva alkaa.</p>
+                                            <p>Hätäsireenit päälle tulvan ollessa aktiivinen</p>
                                         </div>
                                     </div>
                                     <label class="toggle-switch">
@@ -530,12 +530,12 @@
                                 </div>
 
                                 <div class="btn-row" style="margin-top: 0; margin-bottom: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
-                                    <button class="btn" id="floodStartNowBtn" onclick="setFloodAction('start_now')" style="background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%); font-size: 12px;"><i class="fas fa-play"></i> Pakota tulva heti</button>
-                                    <button class="btn" id="floodStartTimerBtn" onclick="setFloodAction('start_15min')" style="background: linear-gradient(135deg, #ffa502 0%, #eccc68 100%); font-size: 12px;"><i class="fas fa-clock"></i> 15min varoitusaika</button>
+                                    <button class="btn" id="floodStartNowBtn" onclick="setFloodAction('start_now')" style="background: linear-gradient(135deg, #ff4757 0%, #ff6b81 100%); font-size: 12px;"><i class="fas fa-play"></i> Aloita tulva heti</button>
+                                    <button class="btn" id="floodStartTimerBtn" onclick="setFloodAction('start_15min')" style="background: linear-gradient(135deg, #ffa502 0%, #eccc68 100%); font-size: 12px;"><i class="fas fa-clock"></i> Aloita 15min varoitusajalla</button>
 
                                     <div id="floodDroppingText" style="display: none; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 14px; text-align: center; font-size: 13px; font-weight: 600; color: #70a1ff;"><i class="fas fa-hourglass-half"></i> Odota</div>
                                     <button class="btn" id="floodStopBtn" onclick="setFloodAction('stop')" style="background: linear-gradient(135deg, #3742fa 0%, #70a1ff 100%); display: none;"><i class="fas fa-arrow-down"></i> Laske Vesi</button>
-                                    <button class="btn" id="floodResetBtn" onclick="setFloodAction('reset')" style="background: linear-gradient(135deg, #2ed573 0%, #1e9e55 100%); display: none;"><i class="fas fa-check"></i> Nollaa ja Lopeta</button>
+                                    <button class="btn" id="floodResetBtn" onclick="setFloodAction('reset')" style="background: linear-gradient(135deg, #2ed573 0%, #1e9e55 100%); display: none;"><i class="fas fa-check"></i> Pakota lopetus (välitön)</button>
                                 </div>
                             </div>
                         </div>
@@ -545,7 +545,7 @@
                                 <i class="fas fa-house-damage"></i>
                                 <div class="info">
                                     <h3>Maanjäristys</h3>
-                                    <p>Koko kaupunki tärisee ja varashälyttimet soivat.</p>
+                                    <p>Koko kaupunki tärisee</p>
                                 </div>
                                 <div class="status" id="status-earthquake">Ei aktiivinen</div>
                             </div>
@@ -563,7 +563,7 @@
                                         <span class="icon">📢</span>
                                         <div class="text">
                                             <h4>Vaaratiedote</h4>
-                                            <p>Lähettää hätäilmoituksen pelaajille ruudulle.</p>
+                                            <p>Lähettää varoituksen pelaajille ennen maanjäristystä</p>
                                         </div>
                                     </div>
                                     <label class="toggle-switch">
@@ -576,7 +576,7 @@
                                         <span class="icon">🚨</span>
                                         <div class="text">
                                             <h4>Väestönsuojasireenit</h4>
-                                            <p>Toistaa hätäsireenit kaupungissa.</p>
+                                            <p>Hätäsireenit päälle maanjäristyksen ollessa aktiivinen</p>
                                         </div>
                                     </div>
                                     <label class="toggle-switch">
@@ -596,7 +596,7 @@
                                 <i class="fas fa-smog"></i>
                                 <div class="info">
                                     <h3>Säkkisumu</h3>
-                                    <p>Paksu modi-sumu peittää näkyvyyden kokonaan.</p>
+                                    <p>Paksu sumu peittää näkyvyyden</p>
                                 </div>
                                 <div class="status" id="status-heavyfog">Ei aktiivinen</div>
                             </div>
@@ -620,7 +620,7 @@
                                 <i class="fas fa-snowflake"></i>
                                 <div class="info">
                                     <h3>Lumimyrsky</h3>
-                                    <p>Erittäin voimakas lumimyrsky peittää näkyvyyden.</p>
+                                    <p>Voimakas lumimyrsky peittää näkyvyyden</p>
                                 </div>
                                 <div class="status" id="status-blizzard">Ei aktiivinen</div>
                             </div>
@@ -637,7 +637,7 @@
                                         <span class="icon">⛄</span>
                                         <div class="text">
                                             <h4>Lisää lunta maahan</h4>
-                                            <p>Pakottaa lumen maastoon myrskyn ajaksi.</p>
+                                            <p>Lisää lumi maahan myrskyn aikana smoothisti</p>
                                         </div>
                                     </div>
                                     <label class="toggle-switch">
@@ -649,8 +649,8 @@
                                     <div class="info">
                                         <span class="icon">*</span>
                                         <div class="text">
-                                            <h4>J&auml;t&auml; lumi maahan</h4>
-                                            <p>Lumi j&auml;&auml; maahan myrskyn j&auml;lkeen.</p>
+                                            <h4>Jätä lumi maahan</h4>
+                                            <p>Lumi jää maahan myös lumimyrskyn jälkeen</p>
                                         </div>
                                     </div>
                                     <label class="toggle-switch">
@@ -670,7 +670,7 @@
                                 <i class="fas fa-ghost"></i>
                                 <div class="info">
                                     <h3>Halloween</h3>
-                                    <p>Halloween-sade, keskiyö lukittu.</p>
+                                    <p>Creepy säätila, keskiyö lukittu</p>
                                 </div>
                                 <div class="status" id="status-halloween">Ei aktiivinen</div>
                             </div>
@@ -679,8 +679,8 @@
                                     <div class="info">
                                         <span class="icon">⛈️</span>
                                         <div class="text">
-                                            <h4>Myrsky + Halloween</h4>
-                                            <p>Aseta myrsky normaalin halloween-sateen sijaan.</p>
+                                            <h4>Salamointi</h4>
+                                            <p>Lisää salamoita</p>
                                         </div>
                                     </div>
                                     <label class="toggle-switch">
@@ -695,14 +695,14 @@
                             </div>
                         </div>
 
-                        <div class="section-title">Ympäristöasetukset</div>
+                        <div class="section-title">Muut</div>
                         <div class="special-options">
                             <div class="special-option">
                                 <div class="info">
                                     <span class="icon">🌑</span>
                                     <div class="text">
-                                        <h4>Blackout-tila</h4>
-                                        <p>Poistaa kaikki tekovalonlähteet.</p>
+                                        <h4>Sähkökatkos</h4>
+                                        <p>Poistaa kaikki tekovalonlähteet</p>
                                     </div>
                                 </div>
                                 <label class="toggle-switch">
@@ -715,7 +715,7 @@
                                     <span class="icon">🚗</span>
                                     <div class="text">
                                         <h4>Ajoneuvojen valot pois</h4>
-                                        <p>Sammuttaa ajoneuvojen valot (Vain jos Blackout päällä)</p>
+                                        <p>Sammuttaa myös ajoneuvojen valot</p>
                                     </div>
                                 </div>
                                 <label class="toggle-switch">
@@ -785,24 +785,13 @@
         let localFloodRiseRate = null; //slider nopeus
 
         const weatherNames = {
-            'EXTRASUNNY': '☀️ Erittäin Aurinkoinen', 'CLEAR': '🌞 Selkeä', 'CLOUDS': '☁️ Pilvinen',
-            'SMOG': '🌫️ Smog', 'FOGGY': '🌁 Sumuinen', 'OVERCAST': '🌥️ Pilvipeitto',
-            'RAIN': '🌧️ Sade', 'THUNDER': '⛈️ Ukkomyrsky', 'CLEARING': '⛅ Selkenevä',
-            'HALLOWEEN': '🎃 Myrsky-Halloween', 'RAIN_HALLOWEEN': '🌧️ Sateinen Halloween',
-            'NEUTRAL': '🌫️ Säkkisumu', 'SNOWLIGHT': '❄️ Kevyt Lumi', 'SNOW': '❄️ Lumi', 'BLIZZARD': '❄️❄️ Lumimyrsky',
+            'EXTRASUNNY': '☀️ Aurinkoinen', 'CLEAR': '🌞 Selkeä', 'CLOUDS': '🌥️ Puolipilvinen',
+            'SMOG': '🌫️ Savusumu', 'FOGGY': '🌁 Sumuinen', 'OVERCAST': '☁️ Pilvipeitto',
+            'RAIN': '🌧️ Sade', 'THUNDER': '⛈️ Ukkomyrsky', 'CLEARING': '🌦 Tihkusade',
+            'HALLOWEEN': '🎃 Halloween', 'RAIN_HALLOWEEN': '🎃 Halloween',
+            'SNOWLIGHT': '⛄ Kevyt Lumisade', 'SNOW': '❄️ Lumisade', 'BLIZZARD': '🌨 Lumimyrsky',
+            'NEUTRAL': '❓ Mit :D', 'XMAS': '🎄 Joulu', 'SNOWLIGHT_POWDER': '⛄ Jauholumi', 'SNOW_POWDER': '❄️ Jauholumi',
         };
-
-        const NormalWeatherTypes = [
-            { id: 'EXTRASUNNY', name: 'Erittäin Aurinkoinen',   emoji: '☀️', chance: 15 },
-            { id: 'CLEAR',      name: 'Selkeä',                emoji: '🌞', chance: 20 },
-            { id: 'CLOUDS',     name: 'Pilvinen',              emoji: '☁️', chance: 15 },
-            { id: 'SMOG',       name: 'Smog',                  emoji: '🌫️', chance: 5  },
-            { id: 'FOGGY',      name: 'Sumuinen',              emoji: '🌁', chance: 5  },
-            { id: 'OVERCAST',   name: 'Pilvipeitto',           emoji: '🌥️', chance: 10 },
-            { id: 'RAIN',       name: 'Sade',                  emoji: '🌧️', chance: 10 },
-            { id: 'THUNDER',    name: 'Ukkosmyrsky',           emoji: '⛈️', chance: 5  },
-            { id: 'CLEARING',   name: 'Selkenevä',             emoji: '⛅', chance: 15 }
-        ];
 
         function generateWeatherButtons() {
             const grid = document.getElementById('basicWeatherGrid'); //säägrid
@@ -852,7 +841,7 @@
                 timerDisplay.style.display = 'inline-block'; //näkyviin
                 let m = Math.ceil(currentState.weatherChangeTimer / 60); //minuutit
                 if (m < 0) m = 0; //ei miinusta
-                timerDisplay.textContent = `Vaihtuu: ${m} min`; //teksti
+                timerDisplay.textContent = `Sää vaihtuu: ${m} min`; //teksti
             }
         }
 
@@ -1284,11 +1273,11 @@
             let modeDesc = 'Sää ja aika vaihtuvat automaattisesti';
             let modeIcon = '☀️';
 
-            if (currentState.activeEvent === 'halloween') { modeName = 'Halloween'; modeDesc = 'Aika lukittu yöhön.'; modeIcon = '🎃'; }
-            else if (currentState.activeEvent === 'heavyfog') { modeName = 'Säkkisumu'; modeDesc = 'Tiheä sumu peittää kaupungin.'; modeIcon = '🌫️'; }
-            else if (currentState.activeEvent === 'earthquake') { modeName = 'Maanjäristys'; modeDesc = 'Kaupunki tärisee.'; modeIcon = '🏠'; }
-            else if (currentState.activeEvent === 'flood') { modeName = 'Vedenpaisumus'; modeDesc = 'Tulva käynnissä.'; modeIcon = '🌊'; }
-            else if (currentState.activeEvent === 'blizzard') { modeName = 'Lumimyrsky'; modeDesc = 'Erittäin voimakas lumimyrsky.'; modeIcon = '❄️'; }
+            if (currentState.activeEvent === 'halloween') { modeName = 'Halloween-event käynnissä'; modeDesc = 'Creepy säätila, aika lukittu yöhön'; modeIcon = '🎃'; }
+            else if (currentState.activeEvent === 'heavyfog') { modeName = 'Säkkisumu-event käynnissä'; modeDesc = 'Näkyvyys heikkoa tiheän sumun takia'; modeIcon = '🌫️'; }
+            else if (currentState.activeEvent === 'earthquake') { modeName = 'Maanjäristys-event käynnissä'; modeDesc = 'Kaupunki tärisee'; modeIcon = '🏠'; }
+            else if (currentState.activeEvent === 'flood') { modeName = 'Vedenpaisumus-event käynnissä'; modeDesc = 'Meriveden korkeus nousee'; modeIcon = '🌊'; }
+            else if (currentState.activeEvent === 'blizzard') { modeName = 'Lumimyrsky-event käynnissä'; modeDesc = 'Voimakas lumimyrsky'; modeIcon = '❄️'; }
 
             document.getElementById('currentModeName').textContent = modeName;
             document.getElementById('currentModeDesc').textContent = modeDesc;
