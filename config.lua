@@ -17,7 +17,7 @@ Config.AdminAceGroup = 'weather.admin' --ace oikeus
 -- ============================================
 Config.WeatherSettings = {
     StartupWeather = 'CLEAR', --aloitussää
-    WeatherChangeInterval = 2, --vaihtoväli min
+    WeatherChangeInterval = 45, --vaihtoväli min
     SnowOnGround = false,      --lumi maassa
 
     NormalWeatherTypes = { --sääprosentit (yhteensä 100%)
